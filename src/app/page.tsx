@@ -40,7 +40,7 @@ const images = [
   'Collection/RenaissanceThrone_solgazm_Monet.png',
   'Collection/PHONECALL_SOLGAZM.png',
   'Collection/WWESOLGAZM.png'
-]
+] as const
 
 const socialLinks = [
   {
@@ -87,7 +87,7 @@ export default function Home() {
   useEffect(() => {
     images.forEach(image => {
       const img = new window.Image()
-      img.src = `/${image}`
+      img.src = image
       img.onload = () => {
         setImageDimensions(prev => ({
           ...prev,
@@ -122,6 +122,7 @@ export default function Home() {
               height={256}
               className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(234,179,8,0.3)]"
               priority
+              unoptimized
             />
           </motion.div>
           <motion.h1
@@ -227,17 +228,13 @@ export default function Home() {
               >
                 <div className="relative overflow-hidden rounded-xl">
                   <Image
-                    src={`/${image}`}
-                    alt={image.replace('.png', '')}
+                    src={image}
+                    alt={image.replace('Collection/', '').replace('.png', '')}
                     width={500}
                     height={imageDimensions[image]?.height * (500 / imageDimensions[image]?.width) || 500}
                     className="w-full transition-all duration-500 ease-out group-hover:scale-105"
                     loading="lazy"
-                    quality={75}
-                    sizes="(max-width: 640px) 100vw,
-                           (max-width: 1024px) 50vw,
-                           (max-width: 1920px) 33vw,
-                           25vw"
+                    unoptimized
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/90 opacity-0 group-hover:opacity-100 transition-all duration-300">
                     <div className="absolute top-0 left-0 right-0 p-6">
@@ -255,7 +252,7 @@ export default function Home() {
                     </div>
                     <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-6 p-4">
                       <a 
-                        href={`/${image}`}
+                        href={image}
                         download
                         onClick={(e) => e.stopPropagation()}
                         className="p-2.5 bg-yellow-400/10 backdrop-blur-sm rounded-full hover:bg-yellow-400/20 transition-all duration-300 hover:scale-110"
@@ -315,14 +312,13 @@ export default function Home() {
             onClick={(e) => e.stopPropagation()}
           >
             <Image
-              src={`/${selectedImage}`}
-              alt={selectedImage.replace('.png', '')}
+              src={selectedImage}
+              alt={selectedImage.replace('Collection/', '').replace('.png', '')}
               className="object-contain max-h-full rounded-lg shadow-2xl"
               width={1200}
               height={800}
               priority
-              quality={100}
-              sizes="100vw"
+              unoptimized
             />
             <motion.button
               initial={{ opacity: 0, scale: 0 }}
