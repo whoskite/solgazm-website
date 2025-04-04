@@ -1,10 +1,9 @@
 'use client'
 
 import React from 'react'
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import Image from "next/image"
 import { useState, useEffect } from "react"
-import { useSession, signIn, signOut } from "next-auth/react"
 
 const images = [
   'Collection/SOLGAZM_VACATION2.png',
@@ -55,7 +54,7 @@ const socialLinks = [
   },
   {
     name: 'Telegram',
-    href: 'https://t.me/SolgazmonSol',
+    href: 'https://t.me/SolgazmSol',
     icon: (props: React.SVGProps<SVGSVGElement>) => (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
         <path d="M22.2647 2.42726C21.9927 2.19181 21.6439 2.0547 21.2851 2.03988C20.9263 2.02505 20.5697 2.13327 20.2797 2.34726L2.43969 14.9473C2.12169 15.1813 1.89645 15.5215 1.80297 15.9083C1.70948 16.2951 1.75354 16.7018 1.92769 17.0593C2.10183 17.4167 2.39609 17.7037 2.75912 17.8726C3.12215 18.0414 3.52947 18.0819 3.91769 17.9873L8.51969 16.8473L10.8797 21.5473C11.0253 21.8561 11.2584 22.1155 11.5499 22.2953C11.8414 22.4751 12.1789 22.5676 12.5227 22.5623C12.8664 22.5569 13.2005 22.4539 13.4857 22.2649C13.7709 22.0759 13.9951 21.8089 14.1297 21.4953L22.7297 3.69526C22.8897 3.34726 22.9318 2.95454 22.8489 2.57892C22.766 2.2033 22.5634 1.86597 22.2647 1.61526V2.42726ZM12.5197 20.2473L10.1497 15.5173L14.1297 12.6973L12.8597 12.0773L8.70769 15.0173L4.25969 16.1173L20.9697 4.28726L12.5197 20.2473Z" fill="currentColor"/>
@@ -82,11 +81,8 @@ const socialLinks = [
 ]
 
 export default function Home() {
-  const { data: session } = useSession()
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [imageDimensions, setImageDimensions] = useState<{[key: string]: { width: number; height: number }}>({})
-  const [showBackToTop, setShowBackToTop] = useState(false)
-  const [showToast, setShowToast] = useState(false)
 
   useEffect(() => {
     images.forEach(image => {
@@ -102,81 +98,10 @@ export default function Home() {
         }))
       }
     })
-
-    const handleScroll = () => {
-      setShowBackToTop(window.scrollY > 500)
-    }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
-
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    })
-  }
-
-  const handleCopyClick = async () => {
-    await navigator.clipboard.writeText("BajGbLkXCJB4sdriYNqQi5wgsiB1rQnf6avWEaM4pump");
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 2000);
-  };
-
-  if (!session) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-black via-black to-yellow-950/20 flex items-center justify-center">
-        <div className="text-center">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="w-32 h-32 mx-auto mb-8"
-          >
-            <Image
-              src="/SOLGAZM_NOSHADOW_ICON 2.png"
-              alt="SOLGAZM Icon"
-              width={128}
-              height={128}
-              className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(234,179,8,0.3)]"
-              priority
-            />
-          </motion.div>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-4xl font-bold mb-8 bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-300 text-transparent bg-clip-text"
-          >
-            Welcome to SOLGAZM
-          </motion.h1>
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            onClick={() => signIn('github')}
-            className="px-6 py-3 bg-yellow-400/20 hover:bg-yellow-400/30 text-yellow-300 rounded-full transition-all duration-300 backdrop-blur-sm"
-          >
-            Sign in to continue
-          </motion.button>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-black to-yellow-950/20">
-      {/* Add sign out button in the top right corner */}
-      <motion.button
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="fixed top-4 right-4 z-50 px-4 py-2 bg-yellow-400/20 hover:bg-yellow-400/30 text-yellow-300 rounded-full transition-all duration-300 backdrop-blur-sm text-sm"
-        onClick={() => signOut()}
-      >
-        Sign out
-      </motion.button>
-
       {/* Hero Section */}
       <div className="relative h-[90vh] flex items-center justify-center">
         <div className="absolute inset-0 overflow-hidden">
@@ -186,34 +111,16 @@ export default function Home() {
         <div className="relative text-center z-10 px-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ 
-              opacity: 1, 
-              scale: 1,
-              y: [0, -15, 0],
-              rotate: [0, -2, 0, 2, 0],
-            }}
-            transition={{ 
-              duration: 1,
-              type: "spring",
-              y: {
-                duration: 2.5,
-                repeat: Infinity,
-                ease: "easeInOut"
-              },
-              rotate: {
-                duration: 5,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }
-            }}
-            className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-8 drop-shadow-[0_0_15px_rgba(234,179,8,0.2)]"
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, type: "spring" }}
+            className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-8"
           >
             <Image
               src="/SOLGAZM_NOSHADOW_ICON 2.png"
               alt="SOLGAZM Icon"
               width={256}
               height={256}
-              className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(234,179,8,0.3)] animate-pulse"
+              className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(234,179,8,0.3)]"
               priority
             />
           </motion.div>
@@ -240,7 +147,9 @@ export default function Home() {
             className="flex items-center justify-center mb-6"
           >
             <button
-              onClick={handleCopyClick}
+              onClick={() => {
+                navigator.clipboard.writeText("BajGbLkXCJB4sdriYNqQi5wgsiB1rQnf6avWEaM4pump");
+              }}
               className="group flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-400/10 hover:bg-yellow-400/20 transition-all duration-300"
             >
               <span className="text-yellow-300 text-sm font-medium">BajGbLk...4pump</span>
@@ -269,13 +178,13 @@ export default function Home() {
               <a
                 key={link.name}
                 href={link.href}
-            target="_blank"
-            rel="noopener noreferrer"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-yellow-500/80 hover:text-yellow-400 transition-colors duration-200"
-          >
+              >
                 <span className="sr-only">{link.name}</span>
                 <link.icon className="w-8 h-8" />
-          </a>
+              </a>
             ))}
           </motion.div>
         </div>
@@ -314,6 +223,7 @@ export default function Home() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
                 className="relative break-inside-avoid group cursor-pointer mb-4"
+                onClick={() => setSelectedImage(image)}
               >
                 <div className="relative overflow-hidden rounded-xl">
                   <Image
@@ -325,64 +235,9 @@ export default function Home() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300">
                     <div className="absolute bottom-0 left-0 right-0 p-4">
-                      <h3 className="text-yellow-300 text-lg font-semibold text-center mb-4">
+                      <h3 className="text-yellow-300 text-lg font-semibold text-center">
                         {image.replace('Collection/', '').replace('.png', '').replace(/_/g, ' ').replace('SOLGAZM', '$GAZM')}
                       </h3>
-                      <div className="flex justify-center gap-4">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const link = document.createElement('a');
-                            link.href = `/${image}`;
-                            link.download = image.split('/').pop() || '';
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                          }}
-                          className="p-2 rounded-full bg-yellow-400/20 hover:bg-yellow-400/30 backdrop-blur-sm transition-all duration-300 group/button"
-                        >
-                          <svg
-                            className="w-5 h-5 text-yellow-300 opacity-80 group-hover/button:opacity-100"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                            />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedImage(image);
-                          }}
-                          className="p-2 rounded-full bg-yellow-400/20 hover:bg-yellow-400/30 backdrop-blur-sm transition-all duration-300 group/button"
-                        >
-                          <svg
-                            className="w-5 h-5 text-yellow-300 opacity-80 group-hover/button:opacity-100"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                            />
-                          </svg>
-                        </button>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -391,66 +246,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="relative mt-20 border-t border-yellow-500/10">
-        <div className="mx-auto max-w-7xl px-6 py-12 md:flex md:items-center md:justify-between lg:px-8">
-          <div className="flex justify-center space-x-6 md:order-2">
-            {socialLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-          target="_blank"
-          rel="noopener noreferrer"
-                className="text-yellow-500/60 hover:text-yellow-400 transition-colors duration-200"
-              >
-                <span className="sr-only">{link.name}</span>
-                <link.icon className="h-6 w-6" />
-              </a>
-            ))}
-          </div>
-          <div className="mt-8 md:order-1 md:mt-0">
-            <div className="flex flex-col items-center md:flex-row md:items-center md:space-x-4">
-              <p className="text-center text-xs leading-5 text-yellow-500/60">
-                &copy; {new Date().getFullYear()} $GAZM. All rights reserved.
-              </p>
-              <div className="flex items-center space-x-1 mt-2 md:mt-0">
-                <span className="text-xs text-yellow-500/60">Made with</span>
-                <svg
-                  className="w-4 h-4 text-yellow-500/60"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                </svg>
-                <span className="text-xs text-yellow-500/60">by SOLGAZM</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
-
-      {/* Back to Top Button */}
-      <motion.button
-        initial={{ opacity: 0, scale: 0.5 }}
-        animate={{ opacity: showBackToTop ? 1 : 0, scale: showBackToTop ? 1 : 0.5 }}
-        onClick={scrollToTop}
-        className="fixed bottom-8 right-8 z-40 p-3 rounded-full bg-yellow-400/20 backdrop-blur-sm hover:bg-yellow-400/30 transition-colors duration-300 shadow-lg"
-      >
-        <svg
-          className="w-6 h-6 text-yellow-300"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M5 10l7-7m0 0l7 7m-7-7v18"
-          />
-        </svg>
-      </motion.button>
 
       {/* Lightbox */}
       {selectedImage && (
@@ -468,8 +263,8 @@ export default function Home() {
             transition={{ type: "spring", duration: 0.5 }}
             className="relative max-w-7xl w-full h-[80vh] mx-auto mt-[10vh] flex items-center justify-center p-4"
             onClick={(e) => e.stopPropagation()}
-        >
-          <Image
+          >
+            <Image
               src={`/${selectedImage}`}
               alt={selectedImage.replace('.png', '')}
               className="object-contain max-h-full rounded-lg shadow-2xl"
@@ -496,35 +291,6 @@ export default function Home() {
           </motion.div>
         </motion.div>
       )}
-
-      {/* Toast Notification */}
-      <AnimatePresence>
-        {showToast && (
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            className="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-50"
-          >
-            <div className="bg-yellow-400/20 backdrop-blur-sm text-yellow-300 px-6 py-3 rounded-full shadow-lg flex items-center gap-2">
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-              <span>Address copied to clipboard!</span>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   )
 }
