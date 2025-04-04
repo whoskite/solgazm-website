@@ -84,10 +84,18 @@ export default function Home() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [imageDimensions, setImageDimensions] = useState<{[key: string]: { width: number; height: number }}>({})
 
+  // Helper function to get image URL
+  const getImageUrl = (imagePath: string) => {
+    return `/api/image/${imagePath}`;
+  };
+
   useEffect(() => {
     images.forEach(image => {
       const img = new window.Image()
-      img.src = `/${image}`
+      img.src = getImageUrl(image)
+      img.onerror = () => {
+        console.error(`Error loading image: ${image}`);
+      }
       img.onload = () => {
         setImageDimensions(prev => ({
           ...prev,
@@ -228,7 +236,7 @@ export default function Home() {
               >
                 <div className="relative overflow-hidden rounded-xl">
                   <Image
-                    src={`/${image}`}
+                    src={getImageUrl(image)}
                     alt={image.replace('Collection/', '').replace('.png', '')}
                     width={500}
                     height={imageDimensions[image]?.height * (500 / imageDimensions[image]?.width) || 500}
@@ -252,17 +260,11 @@ export default function Home() {
                     </div>
                     <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-6 p-4">
                       <a 
-                        href={`/${image}`}
+                        href={getImageUrl(image)}
                         download={image.split('/').pop()}
                         onClick={(e) => {
                           e.stopPropagation();
-                          // Create a direct download by creating a temporary anchor
-                          const link = document.createElement('a');
-                          link.href = `/${image}`;
-                          link.download = image.split('/').pop() || '';
-                          document.body.appendChild(link);
-                          link.click();
-                          document.body.removeChild(link);
+                          window.open(getImageUrl(image), '_blank');
                         }}
                         className="p-2.5 bg-yellow-400/10 backdrop-blur-sm rounded-full hover:bg-yellow-400/20 transition-all duration-300 hover:scale-110"
                         title="Download"
@@ -321,7 +323,7 @@ export default function Home() {
             onClick={(e) => e.stopPropagation()}
           >
             <Image
-              src={`/${selectedImage}`}
+              src={getImageUrl(selectedImage)}
               alt={selectedImage.replace('Collection/', '').replace('.png', '')}
               className="object-contain max-h-full rounded-lg shadow-2xl"
               width={1200}
