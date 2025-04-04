@@ -87,7 +87,7 @@ export default function Home() {
   useEffect(() => {
     images.forEach(image => {
       const img = new window.Image()
-      img.src = image
+      img.src = `/${image}`
       img.onload = () => {
         setImageDimensions(prev => ({
           ...prev,
@@ -228,7 +228,7 @@ export default function Home() {
               >
                 <div className="relative overflow-hidden rounded-xl">
                   <Image
-                    src={image}
+                    src={`/${image}`}
                     alt={image.replace('Collection/', '').replace('.png', '')}
                     width={500}
                     height={imageDimensions[image]?.height * (500 / imageDimensions[image]?.width) || 500}
@@ -252,7 +252,7 @@ export default function Home() {
                     </div>
                     <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-6 p-4">
                       <a 
-                        href={image}
+                        href={`/${image}`}
                         download
                         onClick={(e) => e.stopPropagation()}
                         className="p-2.5 bg-yellow-400/10 backdrop-blur-sm rounded-full hover:bg-yellow-400/20 transition-all duration-300 hover:scale-110"
@@ -312,7 +312,7 @@ export default function Home() {
             onClick={(e) => e.stopPropagation()}
           >
             <Image
-              src={selectedImage}
+              src={`/${selectedImage}`}
               alt={selectedImage.replace('Collection/', '').replace('.png', '')}
               className="object-contain max-h-full rounded-lg shadow-2xl"
               width={1200}
