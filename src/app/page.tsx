@@ -253,8 +253,17 @@ export default function Home() {
                     <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-6 p-4">
                       <a 
                         href={`/${image}`}
-                        download
-                        onClick={(e) => e.stopPropagation()}
+                        download={image.split('/').pop()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Create a direct download by creating a temporary anchor
+                          const link = document.createElement('a');
+                          link.href = `/${image}`;
+                          link.download = image.split('/').pop() || '';
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }}
                         className="p-2.5 bg-yellow-400/10 backdrop-blur-sm rounded-full hover:bg-yellow-400/20 transition-all duration-300 hover:scale-110"
                         title="Download"
                       >
