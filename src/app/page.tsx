@@ -232,6 +232,12 @@ export default function Home() {
                     width={500}
                     height={imageDimensions[image]?.height * (500 / imageDimensions[image]?.width) || 500}
                     className="w-full transition-all duration-500 ease-out group-hover:scale-105"
+                    loading="lazy"
+                    quality={75}
+                    sizes="(max-width: 640px) 100vw,
+                           (max-width: 1024px) 50vw,
+                           (max-width: 1920px) 33vw,
+                           25vw"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/90 opacity-0 group-hover:opacity-100 transition-all duration-300">
                     <div className="absolute top-0 left-0 right-0 p-6">
@@ -316,6 +322,7 @@ export default function Home() {
               height={800}
               priority
               quality={100}
+              sizes="100vw"
             />
             <motion.button
               initial={{ opacity: 0, scale: 0 }}
