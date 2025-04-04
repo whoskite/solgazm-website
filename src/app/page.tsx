@@ -4,6 +4,7 @@ import React from 'react'
 import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
 import { useState, useEffect } from "react"
+import { useSession, signIn, signOut } from "next-auth/react"
 
 const images = [
   'Collection/SOLGAZM_VACATION2.png',
@@ -81,6 +82,7 @@ const socialLinks = [
 ]
 
 export default function Home() {
+  const { data: session } = useSession()
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [imageDimensions, setImageDimensions] = useState<{[key: string]: { width: number; height: number }}>({})
   const [showBackToTop, setShowBackToTop] = useState(false)
@@ -122,8 +124,59 @@ export default function Home() {
     setTimeout(() => setShowToast(false), 2000);
   };
 
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-black via-black to-yellow-950/20 flex items-center justify-center">
+        <div className="text-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="w-32 h-32 mx-auto mb-8"
+          >
+            <Image
+              src="/SOLGAZM_NOSHADOW_ICON 2.png"
+              alt="SOLGAZM Icon"
+              width={128}
+              height={128}
+              className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(234,179,8,0.3)]"
+              priority
+            />
+          </motion.div>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-4xl font-bold mb-8 bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-300 text-transparent bg-clip-text"
+          >
+            Welcome to SOLGAZM
+          </motion.h1>
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            onClick={() => signIn('github')}
+            className="px-6 py-3 bg-yellow-400/20 hover:bg-yellow-400/30 text-yellow-300 rounded-full transition-all duration-300 backdrop-blur-sm"
+          >
+            Sign in to continue
+          </motion.button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-black to-yellow-950/20">
+      {/* Add sign out button in the top right corner */}
+      <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="fixed top-4 right-4 z-50 px-4 py-2 bg-yellow-400/20 hover:bg-yellow-400/30 text-yellow-300 rounded-full transition-all duration-300 backdrop-blur-sm text-sm"
+        onClick={() => signOut()}
+      >
+        Sign out
+      </motion.button>
+
       {/* Hero Section */}
       <div className="relative h-[90vh] flex items-center justify-center">
         <div className="absolute inset-0 overflow-hidden">
@@ -216,13 +269,13 @@ export default function Home() {
               <a
                 key={link.name}
                 href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
+            target="_blank"
+            rel="noopener noreferrer"
                 className="text-yellow-500/80 hover:text-yellow-400 transition-colors duration-200"
-              >
+          >
                 <span className="sr-only">{link.name}</span>
                 <link.icon className="w-8 h-8" />
-              </a>
+          </a>
             ))}
           </motion.div>
         </div>
@@ -347,8 +400,8 @@ export default function Home() {
               <a
                 key={link.name}
                 href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
+          target="_blank"
+          rel="noopener noreferrer"
                 className="text-yellow-500/60 hover:text-yellow-400 transition-colors duration-200"
               >
                 <span className="sr-only">{link.name}</span>
@@ -415,8 +468,8 @@ export default function Home() {
             transition={{ type: "spring", duration: 0.5 }}
             className="relative max-w-7xl w-full h-[80vh] mx-auto mt-[10vh] flex items-center justify-center p-4"
             onClick={(e) => e.stopPropagation()}
-          >
-            <Image
+        >
+          <Image
               src={`/${selectedImage}`}
               alt={selectedImage.replace('.png', '')}
               className="object-contain max-h-full rounded-lg shadow-2xl"
