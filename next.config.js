@@ -2,7 +2,7 @@
 const nextConfig = {
   images: {
     domains: ['localhost', 'vercel.app'],
-    formats: ['image/webp', 'image/png'],
+    formats: ['image/webp'],
     unoptimized: true,
     disableStaticImages: false,
   },
@@ -10,7 +10,6 @@ const nextConfig = {
     NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'http://localhost:3000',
   },
   reactStrictMode: true,
-  swcMinify: true,
   experimental: {
     largePageDataBytes: 128 * 100000, // Increase limit for large pages
   },

@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
 import { useState, useEffect } from "react"
 
@@ -83,10 +83,18 @@ const socialLinks = [
 export default function Home() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [imageDimensions, setImageDimensions] = useState<{[key: string]: { width: number; height: number }}>({})
+  const [showToast, setShowToast] = useState(false)
 
   // Helper function to get image URL
   const getImageUrl = (imagePath: string) => {
-    return `/api/image/${imagePath}`;
+    return `/${imagePath}`;
+  };
+
+  // Function to handle copy to clipboard
+  const handleCopyAddress = () => {
+    navigator.clipboard.writeText("BajGbLkXCJB4sdriYNqQi5wgsiB1rQnf6avWEaM4pump");
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000); // Hide toast after 3 seconds
   };
 
   useEffect(() => {
@@ -110,6 +118,25 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-black to-yellow-950/20">
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {showToast && (
+          <motion.div 
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 px-4 py-2 rounded-lg bg-yellow-400/90 backdrop-blur-sm shadow-lg"
+          >
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span className="font-medium text-black">Address copied to clipboard!</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Hero Section */}
       <div className="relative h-[90vh] flex items-center justify-center">
         <div className="absolute inset-0 overflow-hidden">
@@ -120,9 +147,31 @@ export default function Home() {
           <motion.div
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, type: "spring" }}
-            className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-8"
+            transition={{ 
+              duration: 1.2,
+              type: "spring",
+              stiffness: 100
+            }}
+            whileHover={{ 
+              scale: 1.1,
+              rotate: [0, -5, 5, -5, 0],
+              transition: { duration: 0.5 }
+            }}
+            whileTap={{ scale: 0.9 }}
+            className="w-48 h-48 md:w-64 md:h-64 mx-auto mb-8 cursor-pointer relative"
           >
+            <motion.div
+              className="absolute inset-0 rounded-full bg-yellow-500/20 filter blur-md"
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.3, 0.5, 0.3]
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
             <Image
               src="/SOLGAZM_NOSHADOW_ICON 2.png"
               alt="SOLGAZM Icon"
@@ -156,9 +205,7 @@ export default function Home() {
             className="flex items-center justify-center mb-6"
           >
             <button
-              onClick={() => {
-                navigator.clipboard.writeText("BajGbLkXCJB4sdriYNqQi5wgsiB1rQnf6avWEaM4pump");
-              }}
+              onClick={handleCopyAddress}
               className="group flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-400/10 hover:bg-yellow-400/20 transition-all duration-300"
             >
               <span className="text-yellow-300 text-sm font-medium">BajGbLk...4pump</span>
