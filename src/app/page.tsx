@@ -84,18 +84,49 @@ export default function Home() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [imageDimensions, setImageDimensions] = useState<{[key: string]: { width: number; height: number }}>({})
   const [showToast, setShowToast] = useState(false)
-
+  const [showScrollTop, setShowScrollTop] = useState(false)
+  const [showFullAddress, setShowFullAddress] = useState(false)
+  
+  const contractAddress = "BajGbLkXCJB4sdriYNqQi5wgsiB1rQnf6avWEaM4pump";
+  
   // Helper function to get image URL
   const getImageUrl = (imagePath: string) => {
-    return `/${imagePath}`;
+    // Ensure the path starts with a forward slash
+    if (!imagePath.startsWith('/')) {
+      return `/${imagePath}`;
+    }
+    return imagePath;
   };
 
   // Function to handle copy to clipboard
   const handleCopyAddress = () => {
-    navigator.clipboard.writeText("BajGbLkXCJB4sdriYNqQi5wgsiB1rQnf6avWEaM4pump");
+    navigator.clipboard.writeText(contractAddress);
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000); // Hide toast after 3 seconds
   };
+
+  // Function to toggle address display
+  const toggleAddressDisplay = () => {
+    setShowFullAddress(!showFullAddress);
+  };
+
+  // Function to scroll to top
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
+  // Track scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 500);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     images.forEach(image => {
@@ -204,25 +235,33 @@ export default function Home() {
             transition={{ duration: 1, delay: 0.6 }}
             className="flex items-center justify-center mb-6"
           >
-            <button
-              onClick={handleCopyAddress}
-              className="group flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-400/10 hover:bg-yellow-400/20 transition-all duration-300"
-            >
-              <span className="text-yellow-300 text-sm font-medium">BajGbLk...4pump</span>
-              <svg
-                className="w-4 h-4 text-yellow-300 opacity-50 group-hover:opacity-100 transition-opacity duration-300"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+            <div className="group flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-400/10 hover:bg-yellow-400/20 transition-all duration-300">
+              <button
+                onClick={toggleAddressDisplay}
+                className="text-yellow-300 text-sm font-medium truncate max-w-[220px] hover:underline"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                />
-              </svg>
-            </button>
+                {showFullAddress ? contractAddress : 'BajGbLk...4pump'}
+              </button>
+              <button
+                onClick={handleCopyAddress}
+                className="p-1"
+                title="Copy address"
+              >
+                <svg
+                  className="w-4 h-4 text-yellow-300 opacity-50 group-hover:opacity-100 transition-opacity duration-300"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                  />
+                </svg>
+              </button>
+            </div>
           </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -353,49 +392,76 @@ export default function Home() {
       </div>
 
       {/* Lightbox */}
-      {selectedImage && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/90 z-50 backdrop-blur-sm"
-          onClick={() => setSelectedImage(null)}
-        >
+      <AnimatePresence>
+        {selectedImage && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ type: "spring", duration: 0.5 }}
-            className="relative max-w-7xl w-full h-[80vh] mx-auto mt-[10vh] flex items-center justify-center p-4"
-            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/90 z-50 backdrop-blur-sm"
+            onClick={() => setSelectedImage(null)}
           >
-            <Image
-              src={getImageUrl(selectedImage)}
-              alt={selectedImage.replace('Collection/', '').replace('.png', '')}
-              className="object-contain max-h-full rounded-lg shadow-2xl"
-              width={1200}
-              height={800}
-              priority
-              unoptimized
-            />
-            <motion.button
-              initial={{ opacity: 0, scale: 0 }}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="absolute top-4 right-4 bg-yellow-400/20 backdrop-blur-sm p-3 rounded-full hover:bg-yellow-400/30 transition-colors duration-300"
-              onClick={() => setSelectedImage(null)}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ type: "spring", duration: 0.5 }}
+              className="relative max-w-7xl w-full h-[80vh] mx-auto mt-[10vh] flex items-center justify-center p-4"
+              onClick={(e) => e.stopPropagation()}
             >
-              <svg
-                className="w-6 h-6 text-yellow-300"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+              <Image
+                src={getImageUrl(selectedImage)}
+                alt={selectedImage.replace('Collection/', '').replace('.png', '')}
+                className="object-contain max-h-full rounded-lg shadow-2xl"
+                width={1200}
+                height={800}
+                priority
+                unoptimized
+              />
+              <motion.button
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="absolute top-4 right-4 bg-yellow-400/20 backdrop-blur-sm p-3 rounded-full hover:bg-yellow-400/30 transition-colors duration-300"
+                onClick={() => setSelectedImage(null)}
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </motion.button>
+                <svg
+                  className="w-6 h-6 text-yellow-300"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </motion.button>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
+        )}
+      </AnimatePresence>
+
+      {/* Back to Top Button */}
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={scrollToTop}
+            className="fixed bottom-6 right-6 z-40 p-3 rounded-full bg-yellow-500/30 backdrop-blur-sm hover:bg-yellow-400/40 shadow-xl transition-all duration-300"
+            aria-label="Back to top"
+          >
+            <svg 
+              className="w-6 h-6 text-yellow-100" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+            </svg>
+          </motion.button>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

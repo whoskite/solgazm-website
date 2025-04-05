@@ -45,6 +45,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/solgazm-favicon-32x32.png" sizes="32x32" />
+        <link rel="apple-touch-icon" href="/solgazm-favicon-32x32.png" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
