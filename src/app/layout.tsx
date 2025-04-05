@@ -15,8 +15,25 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Solgazm",
   description: "Made to Orgasm",
-  metadataBase: new URL(process.env.NEXTAUTH_URL || 'http://localhost:3000'),
+  metadataBase: new URL('https://solgazm.vercel.app'),
   openGraph: {
+    type: 'website',
+    title: 'Solgazm',
+    description: 'Made to Orgasm',
+    siteName: 'Solgazm',
+    images: [
+      {
+        url: '/SocialSharingImage_Solgazm.png',
+        width: 1200,
+        height: 630,
+        alt: 'Solgazm Share Image',
+      }
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Solgazm',
+    description: 'Made to Orgasm',
     images: ['/SocialSharingImage_Solgazm.png'],
   },
 };
