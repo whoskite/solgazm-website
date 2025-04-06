@@ -85,7 +85,6 @@ export default function Home() {
   const [imageDimensions, setImageDimensions] = useState<{[key: string]: { width: number; height: number }}>({})
   const [showToast, setShowToast] = useState(false)
   const [showScrollTop, setShowScrollTop] = useState(false)
-  const [showFullAddress, setShowFullAddress] = useState(false)
   
   const contractAddress = "BajGbLkXCJB4sdriYNqQi5wgsiB1rQnf6avWEaM4pump";
   
@@ -103,11 +102,6 @@ export default function Home() {
     navigator.clipboard.writeText(contractAddress);
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000); // Hide toast after 3 seconds
-  };
-
-  // Function to toggle address display
-  const toggleAddressDisplay = () => {
-    setShowFullAddress(!showFullAddress);
   };
 
   // Function to scroll to top
@@ -162,7 +156,7 @@ export default function Home() {
               <svg className="w-5 h-5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              <span className="font-medium text-black">Address copied to clipboard!</span>
+              <span className="font-medium text-black text-xs font-press-play">Address copied to clipboard!</span>
             </div>
           </motion.div>
         )}
@@ -217,7 +211,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
-            className="text-6xl md:text-8xl font-bold mb-4 bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-300 text-transparent bg-clip-text [text-shadow:_0_2px_10px_rgba(234,179,8,0.3)]"
+            className="text-5xl md:text-7xl font-bold mb-1 text-yellow-500 font-fredoka"
           >
             SOLGAZM
           </motion.h1>
@@ -225,7 +219,7 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.5 }}
-            className="text-lg md:text-xl text-yellow-500/80 mb-8"
+            className="text-sm md:text-xl text-yellow-300 font-press-play tracking-[0.15em] mt-1 mb-6"
           >
             Made to Orgasm
           </motion.p>
@@ -233,15 +227,14 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.6 }}
-            className="flex items-center justify-center mb-6"
+            className="flex items-center justify-center mb-8"
           >
             <div className="group flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-400/10 hover:bg-yellow-400/20 transition-all duration-300">
-              <button
-                onClick={toggleAddressDisplay}
-                className="text-yellow-300 text-sm font-medium truncate max-w-[220px] hover:underline"
+              <span
+                className="text-yellow-300 text-xs font-medium font-press-play tracking-wide"
               >
-                {showFullAddress ? contractAddress : 'BajGbLk...4pump'}
-              </button>
+                {contractAddress}
+              </span>
               <button
                 onClick={handleCopyAddress}
                 className="p-1"
@@ -294,7 +287,7 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="text-4xl md:text-5xl font-bold text-yellow-400 mb-4"
+            className="text-3xl md:text-4xl font-bold text-yellow-400 mb-4 font-press-play tracking-wider"
           >
             Gallery
           </motion.h2>
@@ -333,8 +326,8 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/90 opacity-0 group-hover:opacity-100 transition-all duration-300">
                     <div className="absolute top-0 left-0 right-0 p-6">
                       <div className="space-y-1">
-                        <p className="text-yellow-200/70 text-xs font-medium tracking-wider uppercase">$GAZM Collection</p>
-                        <h3 className="text-white text-base font-semibold tracking-wide">
+                        <p className="text-yellow-200/70 text-[10px] font-medium tracking-wider uppercase font-press-play">$GAZM Collection</p>
+                        <h3 className="text-white text-[10px] md:text-xs font-semibold tracking-wide font-press-play">
                           {image
                             .replace('Collection/', '')
                             .replace('.png', '')
