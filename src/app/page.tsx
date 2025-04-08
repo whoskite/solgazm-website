@@ -196,13 +196,16 @@ export default function Home() {
 
         {/* Hero Section */}
         <div className="relative min-h-screen flex items-center justify-center">
-          <div className="relative z-10 max-w-7xl mx-auto px-4 w-full mt-[120px]">
+          {/* Container for centered content AND the absolute button */}
+          <div className="relative z-10 max-w-7xl mx-auto px-4 w-full flex flex-col items-center justify-center h-full pt-[80px]"> 
+            {/* Centered Content (Logo, Text, and Button) */}
             <div className="flex flex-col items-center text-center">
               {/* Logo */}
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
+                className="mb-0"
               >
                 <Image
                   src="/WORLDOFGAZM_LOGO.png"
@@ -214,6 +217,37 @@ export default function Home() {
                   unoptimized
                 />
               </motion.div>
+
+              {/* Text Below Logo */}
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="font-pangolin text-xl md:text-2xl text-white/90 max-w-lg leading-relaxed mb-12"
+              >
+                Explore the <span className="text-[#ca85ff]">degenerate</span> world of <span className="text-[#ca85ff]">Gazms</span> on the blockchain.
+              </motion.p>
+
+              {/* Start Your Journey Button - Back in flow */}
+              <motion.a
+                href="#journey"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                whileHover={{ scale: 1.03, filter: 'brightness(1.1)'}}
+                whileTap={{ scale: 0.98 }}
+                className="inline-block cursor-pointer mt-4 pt-20"
+              >
+                <Image
+                  src="/Start%20Your%20Journey_Icon.png"
+                  alt="Start Your Journey"
+                  width={350}
+                  height={70}
+                  className="w-auto h-auto max-w-xs md:max-w-sm"
+                  priority
+                  unoptimized
+                />
+              </motion.a>
             </div>
           </div>
         </div>
