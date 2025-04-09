@@ -6,6 +6,8 @@ import Image from "next/image"
 
 export default function Home() {
   const [isMuted, setIsMuted] = useState(true)
+  const [isWalletConnected, setIsWalletConnected] = useState(false)
+  const [hoveredCharacter, setHoveredCharacter] = useState<string | null>(null)
   const audioRef = useRef<HTMLAudioElement>(null)
 
   const toggleMute = () => {
@@ -24,6 +26,11 @@ export default function Home() {
     }
   }
 
+  const handleConnectWalletClick = () => {
+    setIsWalletConnected(!isWalletConnected)
+    console.log(isWalletConnected ? "Disconnecting wallet..." : "Connecting wallet...")
+  }
+
   useEffect(() => {
     const audio = audioRef.current
     if (audio) {
@@ -37,7 +44,43 @@ export default function Home() {
   }, [])
 
   return (
-    <div className="min-h-screen relative">
+    <div className="h-screen overflow-hidden relative">
+      {/* SVG Filter for Graffiti Texture */}
+      <svg width="0" height="0" className="absolute">
+        <filter id="gritty-texture" x="-50%" y="-50%" width="200%" height="200%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G" />
+          <feGaussianBlur stdDeviation="0.5" />
+        </filter>
+      </svg>
+
+      {/* CSS Animations */}
+      <style jsx global>{`
+        @keyframes float {
+          0% {
+            transform: translateY(0) translateX(0);
+            opacity: 0;
+          }
+          25% {
+            opacity: 0.7;
+          }
+          50% {
+            transform: translateY(-15px) translateX(5px);
+          }
+          75% {
+            transform: translateY(-5px) translateX(-10px);
+            opacity: 0.8;
+          }
+          100% {
+            transform: translateY(-20px) translateX(0);
+            opacity: 0;
+          }
+        }
+        .animate-float {
+          animation: float 3s ease-in-out infinite;
+        }
+      `}</style>
+
       {/* Background Audio */}
       <audio ref={audioRef} loop preload="auto" playsInline muted>
         <source src="/AUDIO_3722.mp3" type="audio/mpeg" />
@@ -58,32 +101,34 @@ export default function Home() {
       </div>
 
       {/* Content Container */}
-      <div className="relative z-10 min-h-screen">
+      <div className="relative z-10 h-screen">
         {/* Navigation Header */}
         <motion.header 
           initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
+            animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="fixed top-0 left-0 right-0 z-50 bg-black/20"
         >
-          <div className="max-w-7xl mx-auto px-4 flex items-center justify-center gap-8 py-2">
-            <motion.div 
+          <div className="max-w-7xl mx-auto px-6 flex items-center justify-between py-3">
+            {/* Left Section - Logo */}
+          <motion.div
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-[80px] md:w-[100px] cursor-pointer"
+              className="w-[80px] md:w-[100px] cursor-pointer ml-4"
             >
-              <Image
+            <Image
                 src="/1_World of Gazm.png"
                 alt="World of Gazm"
                 width={100}
                 height={100}
                 className="w-full h-auto object-contain py-0.5"
-                priority
-                unoptimized
-              />
-            </motion.div>
+              priority
+              unoptimized
+            />
+          </motion.div>
 
-            <nav className="hidden md:flex items-center space-x-8">
+            {/* Center Section - Navigation */}
+            <nav className="hidden md:flex items-center space-x-12 mx-8">
               <motion.a
                 href="#home"
                 whileHover={{ scale: 1.05 }}
@@ -150,34 +195,78 @@ export default function Home() {
               </motion.a>
             </nav>
 
-            <motion.button
-              onClick={toggleMute}
-              className={`hidden md:flex items-center justify-center w-12 h-12 p-1 rounded-full transition-colors duration-300 ${!isMuted ? 'speaker-glow' : ''}`}
-              title={isMuted ? "Unmute" : "Mute"}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              {isMuted ? (
-                <Image 
-                  src="/Mute_Icon.png" 
-                  alt="Unmute" 
-                  width={40}
-                  height={40}
-                  className="w-full h-full object-contain"
-                  unoptimized
-                />
+            {/* Right Section - Connect Wallet and Audio Controls */}
+            <div className="flex items-center space-x-6 mr-4">
+              {/* Audio Button */}
+              <motion.button
+                onClick={toggleMute}
+                className="hidden md:flex items-center justify-center w-12 h-12 p-1 rounded-full transition-colors duration-300"
+                title={isMuted ? "Unmute" : "Mute"}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                {isMuted ? (
+                  <Image 
+                    src="/Mute_Icon.png" 
+                    alt="Unmute" 
+                    width={40}
+                    height={40}
+                    className="w-full h-full object-contain"
+                    unoptimized
+                  />
+                ) : (
+                  <Image 
+                    src="/Speaker_Icon.png" 
+                    alt="Mute" 
+                    width={40}
+                    height={40}
+                    className="w-full h-full object-contain"
+                    unoptimized
+                  />
+                )}
+              </motion.button>
+              
+              {/* Connect Wallet/Profile Button */}
+              {isWalletConnected ? (
+                // Smaller Profile Button
+                <motion.button
+                  onClick={handleConnectWalletClick}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center justify-center w-20 h-auto"
+                >
+                  <Image
+                    src="/Profile_button.png"
+                    alt="Profile"
+                    width={80}
+                    height={28}
+                    className="w-full h-auto object-contain hover:opacity-80 transition-opacity duration-300 brightness-100"
+                    priority
+                    unoptimized
+                  />
+                </motion.button>
               ) : (
-                <Image 
-                  src="/Speaker_Icon.png" 
-                  alt="Mute" 
-                  width={40}
-                  height={40}
-                  className="w-full h-full object-contain"
-                  unoptimized
-                />
+                // Larger Connect Wallet Button
+                <motion.button
+                  onClick={handleConnectWalletClick}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center justify-center w-28 h-auto"
+          >
+            <Image
+                    src="/ConnectWallet_button.png"
+                    alt="Connect Wallet"
+                    width={110}
+                    height={40}
+                    className="w-full h-auto object-contain hover:opacity-80 transition-opacity duration-300 brightness-100"
+              priority
+              unoptimized
+            />
+                </motion.button>
               )}
-            </motion.button>
+            </div>
 
+            {/* Mobile Menu Button */}
             <motion.button
               whileTap={{ scale: 0.95 }}
               className="md:hidden p-2 text-white hover:text-yellow-400 transition-colors duration-300 absolute right-4"
@@ -195,59 +284,213 @@ export default function Home() {
         </motion.header>
 
         {/* Hero Section */}
-        <div className="relative min-h-screen flex items-center justify-center">
-          {/* Container for centered content AND the absolute button */}
-          <div className="relative z-10 max-w-7xl mx-auto px-4 w-full flex flex-col items-center justify-center h-full pt-[80px]"> 
-            {/* Centered Content (Logo, Text, and Button) */}
-            <div className="flex flex-col items-center text-center">
-              {/* Logo */}
+        <div className="h-screen flex items-center justify-center overflow-hidden">
+          {/* Container for all content */}
+          <div className="relative z-10 max-w-7xl mx-auto px-4 w-full h-full flex items-center justify-center"> 
+            <div className="relative flex flex-col items-center justify-between h-full py-16 md:py-14">
+              {/* Logo (at top with appropriate spacing) */}
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
-                className="mb-0"
+                className="z-20 mt-14 md:mt-10"
               >
                 <Image
                   src="/WORLDOFGAZM_LOGO.png"
                   alt="World of Gazm Logo"
-                  width={400}
-                  height={150}
-                  className="w-auto h-auto max-w-[400px] md:max-w-[500px]"
+                  width={500}
+                  height={200}
+                  className="w-auto h-auto max-w-[350px] md:max-w-[450px]"
                   priority
                   unoptimized
                 />
               </motion.div>
 
-              {/* Text Below Logo */}
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-                className="font-pangolin text-xl md:text-2xl text-white/90 max-w-lg leading-relaxed mb-12"
-              >
-                Explore the <span className="text-[#ca85ff]">degenerate</span> world of <span className="text-[#ca85ff]">Gazms</span> on the blockchain.
-              </motion.p>
-
-              {/* Start Your Journey Button - Back in flow */}
-              <motion.a
-                href="#journey"
+              {/* Character Layer (below logo) */}
+              <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                whileHover={{ scale: 1.03, filter: 'brightness(1.1)'}}
-                whileTap={{ scale: 0.98 }}
-                className="inline-block cursor-pointer mt-4 pt-20"
+                className="z-20 flex-1 flex items-center relative"
               >
-                <Image
-                  src="/Start%20Your%20Journey_Icon.png"
-                  alt="Start Your Journey"
-                  width={350}
-                  height={70}
-                  className="w-auto h-auto max-w-xs md:max-w-sm"
-                  priority
-                  unoptimized
-                />
-              </motion.a>
+                <div className="flex justify-center w-full">
+                  {/* Characters in a row */}
+                  <div className="flex gap-0 -mt-10 -mb-2">
+                    {/* Kite Character */}
+                    <div 
+                      className={`w-[180px] md:w-[400px] lg:w-[520px] -mr-8 md:-mr-16 lg:-mr-20 relative transition-all duration-300 ${hoveredCharacter === 'kite' ? 'scale-105 z-20' : ''}`}
+                      onMouseEnter={() => setHoveredCharacter('kite')}
+                      onMouseLeave={() => setHoveredCharacter(null)}
+                    >
+                      {hoveredCharacter === 'kite' && (
+                        <>
+                          {/* Character silhouette glow */}
+                          <div className="absolute inset-0 z-0">
+                            <div className="absolute w-full h-full" style={{ filter: "drop-shadow(0 0 8px rgba(138, 43, 226, 0.8)) drop-shadow(0 0 20px rgba(138, 43, 226, 0.6))" }}>
+                              <Image
+                                src="/Kite_Character.png"
+                                alt="Kite Glow"
+                                width={800}
+                                height={1280}
+                                className="w-full h-auto opacity-70"
+                                unoptimized
+                              />
+                            </div>
+                          </div>
+                          {/* Animated aura particles */}
+                          <div className="absolute inset-0 overflow-hidden">
+                            {[...Array(10)].map((_, i) => (
+                              <div 
+                                key={i}
+                                className="absolute w-4 h-4 rounded-full bg-purple-500 opacity-70 animate-float"
+                                style={{
+                                  left: `${Math.random() * 100}%`,
+                                  top: `${Math.random() * 100}%`,
+                                  animationDelay: `${i * 0.2}s`,
+                                  animationDuration: `${2 + Math.random() * 2}s`,
+                                  boxShadow: '0 0 10px 2px rgba(138, 43, 226, 0.6)'
+                                }}
+                              />
+                            ))}
+                          </div>
+                        </>
+                      )}
+                      <Image
+                        src="/Kite_Character.png"
+                        alt="Kite Gazm"
+                        width={800}
+                        height={1280}
+                        className="w-full h-auto relative z-10"
+                        unoptimized
+                      />
+                    </div>
+                    
+                    {/* Wizard Character (Center) */}
+                    <div 
+                      className={`w-[180px] md:w-[400px] lg:w-[520px] z-10 relative transition-all duration-300 ${hoveredCharacter === 'wizard' ? 'scale-105 z-20' : ''}`}
+                      onMouseEnter={() => setHoveredCharacter('wizard')}
+                      onMouseLeave={() => setHoveredCharacter(null)}
+                    >
+                      {hoveredCharacter === 'wizard' && (
+                        <>
+                          {/* Character silhouette glow */}
+                          <div className="absolute inset-0 z-0">
+                            <div className="absolute w-full h-full" style={{ filter: "drop-shadow(0 0 8px rgba(100, 143, 255, 0.8)) drop-shadow(0 0 20px rgba(100, 143, 255, 0.6))" }}>
+                              <Image
+                                src="/Wizard_Character.png"
+                                alt="Wizard Glow"
+                                width={800}
+                                height={1280}
+                                className="w-full h-auto opacity-70"
+                                unoptimized
+                              />
+                            </div>
+                          </div>
+                          {/* Animated aura particles */}
+                          <div className="absolute inset-0 overflow-hidden">
+                            {[...Array(10)].map((_, i) => (
+                              <div 
+                                key={i}
+                                className="absolute w-4 h-4 rounded-full bg-blue-400 opacity-70 animate-float"
+                                style={{
+                                  left: `${Math.random() * 100}%`,
+                                  top: `${Math.random() * 100}%`,
+                                  animationDelay: `${i * 0.2}s`,
+                                  animationDuration: `${2 + Math.random() * 2}s`,
+                                  boxShadow: '0 0 10px 2px rgba(100, 143, 255, 0.6)'
+                                }}
+                              />
+                            ))}
+                          </div>
+                        </>
+                      )}
+                      <Image
+                        src="/Wizard_Character.png"
+                        alt="Wizard Gazm"
+                        width={800}
+                        height={1280}
+                        className="w-full h-auto relative z-10"
+                        unoptimized
+                      />
+                    </div>
+                    
+                    {/* Solgazm Character */}
+                    <div 
+                      className={`w-[180px] md:w-[400px] lg:w-[520px] -ml-8 md:-ml-16 lg:-ml-20 relative transition-all duration-300 ${hoveredCharacter === 'solgazm' ? 'scale-105 z-20' : ''}`}
+                      onMouseEnter={() => setHoveredCharacter('solgazm')}
+                      onMouseLeave={() => setHoveredCharacter(null)}
+                    >
+                      {hoveredCharacter === 'solgazm' && (
+                        <>
+                          {/* Character silhouette glow */}
+                          <div className="absolute inset-0 z-0">
+                            <div className="absolute w-full h-full" style={{ filter: "drop-shadow(0 0 8px rgba(211, 87, 255, 0.8)) drop-shadow(0 0 20px rgba(211, 87, 255, 0.6))" }}>
+                              <Image
+                                src="/Solgazm_Character.png"
+                                alt="Solgazm Glow"
+                                width={800}
+                                height={1280}
+                                className="w-full h-auto opacity-70"
+                                unoptimized
+                              />
+                            </div>
+                          </div>
+                          {/* Animated aura particles */}
+                          <div className="absolute inset-0 overflow-hidden">
+                            {[...Array(10)].map((_, i) => (
+                              <div 
+                                key={i}
+                                className="absolute w-4 h-4 rounded-full bg-purple-400 opacity-70 animate-float"
+                                style={{
+                                  left: `${Math.random() * 100}%`,
+                                  top: `${Math.random() * 100}%`,
+                                  animationDelay: `${i * 0.2}s`,
+                                  animationDuration: `${2 + Math.random() * 2}s`,
+                                  boxShadow: '0 0 10px 2px rgba(211, 87, 255, 0.6)'
+                                }}
+                              />
+                            ))}
+                          </div>
+                        </>
+                      )}
+                      <Image
+                        src="/Solgazm_Character.png"
+                        alt="Solgazm"
+                        width={800}
+                        height={1280}
+                        className="w-full h-auto relative z-10"
+                        unoptimized
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Start Your Journey Button - Overlapping Characters */}
+                <motion.div
+                  className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none"
+                  style={{ paddingTop: "15%" }}
+                >
+                  <motion.a
+                    href="#journey"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.3 }}
+                    whileHover={{ scale: 1.03, filter: 'brightness(1.1)'}}
+                    whileTap={{ scale: 0.98 }}
+                    className="cursor-pointer pointer-events-auto"
+                  >
+                    <Image
+                      src="/Start%20Your%20Journey_Icon.png"
+                      alt="Start Your Journey"
+                      width={300}
+                      height={60}
+                      className="w-auto h-auto max-w-[280px] md:max-w-[300px]"
+                      priority
+                      unoptimized
+                    />
+                  </motion.a>
+                </motion.div>
+              </motion.div>
             </div>
           </div>
         </div>
