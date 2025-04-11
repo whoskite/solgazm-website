@@ -8,7 +8,10 @@ export default function Home() {
   const [isMuted, setIsMuted] = useState(true)
   const [isWalletConnected, setIsWalletConnected] = useState(false)
   const [hoveredCharacter, setHoveredCharacter] = useState<string | null>(null)
+  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 })
+  const [isClicking, setIsClicking] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
+  const cursorRef = useRef<HTMLDivElement>(null)
 
   const toggleMute = () => {
     const audio = audioRef.current
@@ -43,8 +46,75 @@ export default function Home() {
     }
   }, [])
 
+  // Custom cursor implementation
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setCursorPosition({ x: e.clientX, y: e.clientY });
+    };
+
+    const handleMouseDown = () => {
+      setIsClicking(true);
+    };
+
+    const handleMouseUp = () => {
+      setIsClicking(false);
+    };
+    
+    // Prevent right-click context menu
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      return false;
+    };
+
+    // Add event listeners
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('contextmenu', handleContextMenu);
+
+    // Hide the default cursor
+    document.body.style.cursor = 'none';
+    
+    // Apply to all elements that should have a pointer cursor
+    const elements = document.querySelectorAll('a, button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]');
+    elements.forEach(el => {
+      (el as HTMLElement).style.cursor = 'none';
+    });
+
+    return () => {
+      // Clean up event listeners
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('contextmenu', handleContextMenu);
+      
+      // Restore default cursor
+      document.body.style.cursor = 'auto';
+    };
+  }, []);
+
   return (
     <div className="h-screen overflow-hidden relative">
+      {/* Custom Cursor */}
+      <div 
+        ref={cursorRef}
+        className="fixed pointer-events-none z-50"
+        style={{
+          left: `${cursorPosition.x}px`,
+          top: `${cursorPosition.y}px`,
+          transform: 'translate(-15px, -15px)'
+        }}
+      >
+        <Image
+          src={isClicking ? "/handcursor_solgazm_2.png" : "/handcursor_solgazm1.png"}
+          alt="Cursor"
+          width={45}
+          height={45}
+          className="w-auto h-auto max-w-[45px]"
+          priority
+        />
+      </div>
+
       {/* SVG Filter for Graffiti Texture */}
       <svg width="0" height="0" className="absolute">
         <filter id="gritty-texture" x="-50%" y="-50%" width="200%" height="200%">
