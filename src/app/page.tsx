@@ -11,6 +11,8 @@ export default function Home() {
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 })
   const [isClicking, setIsClicking] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
+  const bubbleAudioRef = useRef<HTMLAudioElement>(null)
+  const insertCoinAudioRef = useRef<HTMLAudioElement>(null)
   const cursorRef = useRef<HTMLDivElement>(null)
 
   const toggleMute = () => {
@@ -26,10 +28,26 @@ export default function Home() {
           setIsMuted(true)
         })
       }
+      // Also mute/unmute other sounds
+      if (bubbleAudioRef.current) {
+        bubbleAudioRef.current.muted = currentlyMuted;
+      }
+      if (insertCoinAudioRef.current) {
+        insertCoinAudioRef.current.muted = currentlyMuted;
+      }
     }
   }
 
   const handleConnectWalletClick = () => {
+    // Play insert coin sound if not muted
+    const insertCoinSound = insertCoinAudioRef.current;
+    if (insertCoinSound && !insertCoinSound.muted) {
+      insertCoinSound.currentTime = 0; // Reset sound to start
+      insertCoinSound.play().catch(error => {
+        console.error("Error playing insert coin sound:", error);
+      });
+    }
+    
     setIsWalletConnected(!isWalletConnected)
     console.log(isWalletConnected ? "Disconnecting wallet..." : "Connecting wallet...")
   }
@@ -52,8 +70,22 @@ export default function Home() {
       setCursorPosition({ x: e.clientX, y: e.clientY });
     };
 
-    const handleMouseDown = () => {
+    const handleMouseDown = (e: MouseEvent) => {
       setIsClicking(true);
+      // Check if the click is on the connect wallet button
+      const target = e.target as HTMLElement;
+      const isConnectWalletButton = target.closest('button')?.querySelector('img[alt="Connect Wallet"]') !== null;
+      
+      // Only play bubble sound if not clicking connect wallet button
+      if (!isConnectWalletButton) {
+        const bubbleSound = bubbleAudioRef.current;
+        if (bubbleSound && !bubbleSound.muted) {
+          bubbleSound.currentTime = 0; // Reset sound to start
+          bubbleSound.play().catch(error => {
+            console.error("Error playing bubble sound:", error);
+          });
+        }
+      }
     };
 
     const handleMouseUp = () => {
@@ -154,6 +186,18 @@ export default function Home() {
       {/* Background Audio */}
       <audio ref={audioRef} loop preload="auto" playsInline muted>
         <source src="/AUDIO_3722.mp3" type="audio/mpeg" />
+        Your browser does not support the audio element.
+      </audio>
+
+      {/* Bubble Click Sound Effect */}
+      <audio ref={bubbleAudioRef} preload="auto" playsInline muted>
+        <source src="/Bubble Effect.mp3" type="audio/mpeg" />
+        Your browser does not support the audio element.
+      </audio>
+
+      {/* Insert Coin Sound Effect */}
+      <audio ref={insertCoinAudioRef} preload="auto" playsInline muted>
+        <source src="/Insert_Coin.wav" type="audio/wav" />
         Your browser does not support the audio element.
       </audio>
       
@@ -388,7 +432,7 @@ export default function Home() {
                   <div className="flex gap-0 -mt-10 -mb-2">
                     {/* Kite Character */}
                     <div 
-                      className={`w-[180px] md:w-[400px] lg:w-[520px] -mr-8 md:-mr-16 lg:-mr-20 relative transition-all duration-300 ${hoveredCharacter === 'kite' ? 'scale-105 z-20' : ''}`}
+                      className={`w-[200px] md:w-[400px] lg:w-[500px] -mr-8 md:-mr-16 lg:-mr-20 relative transition-all duration-300 ${hoveredCharacter === 'kite' ? 'scale-105 z-20' : ''}`}
                       onMouseEnter={() => setHoveredCharacter('kite')}
                       onMouseLeave={() => setHoveredCharacter(null)}
                     >
@@ -396,7 +440,7 @@ export default function Home() {
                         <>
                           {/* Character silhouette glow */}
                           <div className="absolute inset-0 z-0">
-                            <div className="absolute w-full h-full" style={{ filter: "drop-shadow(0 0 8px rgba(138, 43, 226, 0.8)) drop-shadow(0 0 20px rgba(138, 43, 226, 0.6))" }}>
+                            <div className="absolute w-full h-full" style={{ filter: "drop-shadow(0 0 8px rgba(0, 255, 0, 0.8)) drop-shadow(0 0 20px rgba(50, 255, 50, 0.6))" }}>
                               <Image
                                 src="/Kite_Character.png"
                                 alt="Kite Glow"
@@ -406,22 +450,6 @@ export default function Home() {
                                 unoptimized
                               />
                             </div>
-                          </div>
-                          {/* Animated aura particles */}
-                          <div className="absolute inset-0 overflow-hidden">
-                            {[...Array(10)].map((_, i) => (
-                              <div 
-                                key={i}
-                                className="absolute w-4 h-4 rounded-full bg-purple-500 opacity-70 animate-float"
-                                style={{
-                                  left: `${Math.random() * 100}%`,
-                                  top: `${Math.random() * 100}%`,
-                                  animationDelay: `${i * 0.2}s`,
-                                  animationDuration: `${2 + Math.random() * 2}s`,
-                                  boxShadow: '0 0 10px 2px rgba(138, 43, 226, 0.6)'
-                                }}
-                              />
-                            ))}
                           </div>
                         </>
                       )}
@@ -434,10 +462,43 @@ export default function Home() {
                         unoptimized
                       />
                     </div>
+
+                    {/* PROD Character */}
+                    <div 
+                      className={`w-[200px] md:w-[400px] lg:w-[500px] -mr-8 md:-mr-16 lg:-mr-20 relative transition-all duration-300 ${hoveredCharacter === 'prod' ? 'scale-105 z-20' : ''}`}
+                      onMouseEnter={() => setHoveredCharacter('prod')}
+                      onMouseLeave={() => setHoveredCharacter(null)}
+                    >
+                      {hoveredCharacter === 'prod' && (
+                        <>
+                          {/* Character silhouette glow */}
+                          <div className="absolute inset-0 z-0">
+                            <div className="absolute w-full h-full" style={{ filter: "drop-shadow(0 0 8px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 20px rgba(255, 215, 0, 0.6))" }}>
+                              <Image
+                                src="/PROD_Character.png"
+                                alt="PROD Glow"
+                                width={800}
+                                height={1280}
+                                className="w-full h-auto opacity-70"
+                                unoptimized
+                              />
+                            </div>
+                          </div>
+                        </>
+                      )}
+                      <Image
+                        src="/PROD_Character.png"
+                        alt="PROD Gazm"
+                        width={800}
+                        height={1280}
+                        className="w-full h-auto relative z-10"
+                        unoptimized
+                      />
+                    </div>
                     
                     {/* Wizard Character (Center) */}
                     <div 
-                      className={`w-[180px] md:w-[400px] lg:w-[520px] z-10 relative transition-all duration-300 ${hoveredCharacter === 'wizard' ? 'scale-105 z-20' : ''}`}
+                      className={`w-[200px] md:w-[400px] lg:w-[500px] z-10 relative transition-all duration-300 ${hoveredCharacter === 'wizard' ? 'scale-105 z-20' : ''}`}
                       onMouseEnter={() => setHoveredCharacter('wizard')}
                       onMouseLeave={() => setHoveredCharacter(null)}
                     >
@@ -456,22 +517,6 @@ export default function Home() {
                               />
                             </div>
                           </div>
-                          {/* Animated aura particles */}
-                          <div className="absolute inset-0 overflow-hidden">
-                            {[...Array(10)].map((_, i) => (
-                              <div 
-                                key={i}
-                                className="absolute w-4 h-4 rounded-full bg-blue-400 opacity-70 animate-float"
-                                style={{
-                                  left: `${Math.random() * 100}%`,
-                                  top: `${Math.random() * 100}%`,
-                                  animationDelay: `${i * 0.2}s`,
-                                  animationDuration: `${2 + Math.random() * 2}s`,
-                                  boxShadow: '0 0 10px 2px rgba(100, 143, 255, 0.6)'
-                                }}
-                              />
-                            ))}
-                          </div>
                         </>
                       )}
                       <Image
@@ -486,7 +531,7 @@ export default function Home() {
                     
                     {/* Solgazm Character */}
                     <div 
-                      className={`w-[180px] md:w-[400px] lg:w-[520px] -ml-8 md:-ml-16 lg:-ml-20 relative transition-all duration-300 ${hoveredCharacter === 'solgazm' ? 'scale-105 z-20' : ''}`}
+                      className={`w-[200px] md:w-[400px] lg:w-[500px] -ml-8 md:-ml-16 lg:-ml-20 relative transition-all duration-300 ${hoveredCharacter === 'solgazm' ? 'scale-105 z-20' : ''}`}
                       onMouseEnter={() => setHoveredCharacter('solgazm')}
                       onMouseLeave={() => setHoveredCharacter(null)}
                     >
@@ -494,7 +539,7 @@ export default function Home() {
                         <>
                           {/* Character silhouette glow */}
                           <div className="absolute inset-0 z-0">
-                            <div className="absolute w-full h-full" style={{ filter: "drop-shadow(0 0 8px rgba(211, 87, 255, 0.8)) drop-shadow(0 0 20px rgba(211, 87, 255, 0.6))" }}>
+                            <div className="absolute w-full h-full" style={{ filter: "drop-shadow(0 0 8px rgba(255, 0, 0, 0.8)) drop-shadow(0 0 20px rgba(255, 50, 50, 0.6))" }}>
                               <Image
                                 src="/Solgazm_Character.png"
                                 alt="Solgazm Glow"
@@ -504,22 +549,6 @@ export default function Home() {
                                 unoptimized
                               />
                             </div>
-                          </div>
-                          {/* Animated aura particles */}
-                          <div className="absolute inset-0 overflow-hidden">
-                            {[...Array(10)].map((_, i) => (
-                              <div 
-                                key={i}
-                                className="absolute w-4 h-4 rounded-full bg-purple-400 opacity-70 animate-float"
-                                style={{
-                                  left: `${Math.random() * 100}%`,
-                                  top: `${Math.random() * 100}%`,
-                                  animationDelay: `${i * 0.2}s`,
-                                  animationDuration: `${2 + Math.random() * 2}s`,
-                                  boxShadow: '0 0 10px 2px rgba(211, 87, 255, 0.6)'
-                                }}
-                              />
-                            ))}
                           </div>
                         </>
                       )}
