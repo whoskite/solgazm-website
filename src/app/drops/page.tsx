@@ -38,18 +38,11 @@ export default function Drops() {
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mousedown', handleMouseDown);
     document.addEventListener('mouseup', handleMouseUp);
-    document.body.style.cursor = 'none';
-    
-    const elements = document.querySelectorAll('a, button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]');
-    elements.forEach(el => {
-      (el as HTMLElement).style.cursor = 'none';
-    });
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mousedown', handleMouseDown);
       document.removeEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = 'auto';
     };
   }, []);
 
@@ -70,7 +63,7 @@ export default function Drops() {
           alt="Cursor"
           width={45}
           height={45}
-          className="w-auto h-auto max-w-[45px]"
+          className="w-auto h-auto"
           priority
         />
       </div>
@@ -187,8 +180,6 @@ export default function Drops() {
 
             {/* Right Section - Connect Wallet and Audio Controls */}
             <div className="flex items-center space-x-6 mr-4">
-              {/* Wallet Button */}
-              <WalletButton />
               {/* Audio Button */}
               <motion.button
                 onClick={toggleAudio}
@@ -217,6 +208,9 @@ export default function Drops() {
                   />
                 )}
               </motion.button>
+              
+              {/* Wallet Button */}
+              <WalletButton />
             </div>
           </div>
         </motion.header>

@@ -60,7 +60,6 @@ export default function Home() {
     });
 
     return () => {
-      // Clean up event listeners
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mousedown', handleMouseDown);
       document.removeEventListener('mouseup', handleMouseUp);
@@ -87,7 +86,7 @@ export default function Home() {
           alt="Cursor"
           width={45}
           height={45}
-          className="w-auto h-auto max-w-[45px]"
+          className="w-auto h-auto"
           priority
         />
       </div>

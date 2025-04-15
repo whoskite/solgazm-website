@@ -6,6 +6,7 @@ import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
+import { useAudio } from '@/contexts/AudioContext';
 
 // Define the Phantom wallet type
 interface PhantomWindow extends Window {
@@ -21,13 +22,11 @@ declare const window: PhantomWindow;
 export const WalletButton: FC = () => {
   const { connected, connecting, disconnect, publicKey } = useWallet();
   const { setVisible } = useWalletModal();
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const { playInsertCoinSound } = useAudio();
 
   const handleClick = useCallback(async () => {
     try {
-      if (audioRef.current) {
-        audioRef.current.play().catch(console.error);
-      }
+      playInsertCoinSound();
 
       if (!connected) {
         setVisible(true);
@@ -39,7 +38,7 @@ export const WalletButton: FC = () => {
       console.error('Wallet interaction error:', error);
       toast.error('Failed to interact with wallet');
     }
-  }, [connected, disconnect, setVisible]);
+  }, [connected, disconnect, setVisible, playInsertCoinSound]);
 
   // Show toast when wallet is connected
   useEffect(() => {
@@ -53,24 +52,21 @@ export const WalletButton: FC = () => {
   }, [connected, publicKey]);
 
   return (
-    <>
-      <audio ref={audioRef} src="/Insert_Coin.wav" preload="auto" />
-      <motion.div
-        onClick={handleClick}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        className={`flex items-center justify-center ${connected ? 'w-12 h-12' : 'w-28 h-auto'}`}
-      >
-        <Image
-          src={connected ? '/Profile_button.png' : '/ConnectWallet_button.png'}
-          alt={connected ? 'Profile Button' : 'Connect Wallet Button'}
-          width={connected ? 40 : 100}
-          height={connected ? 40 : 35}
-          className="w-full h-auto object-contain hover:opacity-80 transition-opacity duration-300 brightness-100"
-          priority
-          unoptimized
-        />
-      </motion.div>
-    </>
+    <motion.div
+      onClick={handleClick}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      className={`flex items-center justify-center ${connected ? 'w-12 h-12' : 'w-28 h-auto'}`}
+    >
+      <Image
+        src={connected ? '/Profile_button.png' : '/ConnectWallet_button.png'}
+        alt={connected ? 'Profile Button' : 'Connect Wallet Button'}
+        width={connected ? 40 : 100}
+        height={connected ? 40 : 35}
+        className="w-full h-auto object-contain hover:opacity-80 transition-opacity duration-300 brightness-100"
+        priority
+        unoptimized
+      />
+    </motion.div>
   );
 }; 
