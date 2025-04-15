@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ClientLayout } from "@/components/ClientLayout";
 import '@solana/wallet-adapter-react-ui/styles.css';
+import { Toaster } from 'react-hot-toast';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -47,6 +48,23 @@ export default function RootLayout({
         <ClientLayout>
           {children}
         </ClientLayout>
+        <Toaster 
+          position="bottom-right"
+          toastOptions={{
+            style: {
+              background: '#333',
+              color: '#fff',
+              borderRadius: '8px',
+            },
+            success: {
+              duration: 3000,
+              iconTheme: {
+                primary: '#4ade80',
+                secondary: '#333',
+              },
+            },
+          }}
+        />
       </body>
     </html>
   );

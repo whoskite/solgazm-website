@@ -201,34 +201,34 @@ export default function Home() {
       </div>
 
       {/* Content Container */}
-      <div className="relative z-10 h-screen">
+      <main className="relative min-h-screen z-10">
         {/* Navigation Header */}
         <motion.header 
           initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="fixed top-0 left-0 right-0 z-50 bg-black/20"
+          className="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-sm"
         >
-          <div className="max-w-7xl mx-auto px-6 flex items-center justify-between py-3">
+          <div className="max-w-7xl mx-auto px-4 flex items-center justify-between py-3">
             {/* Left Section - Logo */}
-          <motion.div
+            <motion.div
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-[80px] md:w-[100px] cursor-pointer ml-4"
+              className="w-[80px] md:w-[100px] cursor-pointer"
             >
-            <Image
+              <Image
                 src="/1_World of Gazm.png"
                 alt="World of Gazm"
                 width={100}
                 height={100}
-                className="w-full h-auto object-contain py-0.5"
-              priority
-              unoptimized
-            />
-          </motion.div>
+                className="w-full h-auto object-contain"
+                priority
+                unoptimized
+              />
+            </motion.div>
 
             {/* Center Section - Navigation */}
-            <nav className="hidden md:flex items-center space-x-12 mx-8">
+            <nav className="hidden md:flex items-center space-x-12">
               <motion.a
                 href="#home"
                 whileHover={{ scale: 1.05 }}
@@ -543,7 +543,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   )
 }
