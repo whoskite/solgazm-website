@@ -3,10 +3,11 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { motion } from "framer-motion"
 import Image from "next/image"
+import Link from "next/link"
+import { WalletButton } from "@/components/WalletButton"
 
 export default function Home() {
   const [isMuted, setIsMuted] = useState(true)
-  const [isWalletConnected, setIsWalletConnected] = useState(false)
   const [hoveredCharacter, setHoveredCharacter] = useState<string | null>(null)
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 })
   const [isClicking, setIsClicking] = useState(false)
@@ -38,20 +39,6 @@ export default function Home() {
     }
   }
 
-  const handleConnectWalletClick = () => {
-    // Play insert coin sound if not muted
-    const insertCoinSound = insertCoinAudioRef.current;
-    if (insertCoinSound && !insertCoinSound.muted) {
-      insertCoinSound.currentTime = 0; // Reset sound to start
-      insertCoinSound.play().catch(error => {
-        console.error("Error playing insert coin sound:", error);
-      });
-    }
-    
-    setIsWalletConnected(!isWalletConnected)
-    console.log(isWalletConnected ? "Disconnecting wallet..." : "Connecting wallet...")
-  }
-
   useEffect(() => {
     const audio = audioRef.current
     if (audio) {
@@ -74,17 +61,17 @@ export default function Home() {
       setIsClicking(true);
       // Check if the click is on the connect wallet button
       const target = e.target as HTMLElement;
-      const isConnectWalletButton = target.closest('button')?.querySelector('img[alt="Connect Wallet"]') !== null;
+      const isConnectWalletButton = target.closest('img[alt="Connect Wallet"]') !== null ||
+                                   target.closest('button')?.querySelector('img[alt="Connect Wallet"]') !== null ||
+                                   target.closest('button')?.querySelector('img[src="/ConnectWallet_button.png"]') !== null;
       
-      // Only play bubble sound if not clicking connect wallet button
-      if (!isConnectWalletButton) {
-        const bubbleSound = bubbleAudioRef.current;
-        if (bubbleSound && !bubbleSound.muted) {
-          bubbleSound.currentTime = 0; // Reset sound to start
-          bubbleSound.play().catch(error => {
-            console.error("Error playing bubble sound:", error);
-          });
-        }
+      // Play bubble sound if not clicking connect wallet button and not muted
+      const bubbleSound = bubbleAudioRef.current;
+      if (!isConnectWalletButton && bubbleSound && !bubbleSound.muted) {
+        bubbleSound.currentTime = 0; // Reset sound to start
+        bubbleSound.play().catch(error => {
+          console.error("Error playing bubble sound:", error);
+        });
       }
     };
 
@@ -124,7 +111,6 @@ export default function Home() {
       document.body.style.cursor = 'auto';
     };
   }, []);
-
   return (
     <div className="h-screen overflow-hidden relative">
       {/* Custom Cursor */}
@@ -259,22 +245,22 @@ export default function Home() {
                   unoptimized
                 />
               </motion.a>
-              <motion.a
-                href="#drops"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center justify-center w-28 h-auto"
-              >
-                <Image
-                  src="/Drop_button.png"
-                  alt="Drops Button"
-                  width={100}
-                  height={35}
-                  className="w-full h-auto object-contain hover:opacity-80 transition-opacity duration-300 brightness-100"
-                  priority
-                  unoptimized
-                />
-              </motion.a>
+              <Link href="/drops" className="flex items-center justify-center w-28 h-auto">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Image
+                    src="/Drop_button.png"
+                    alt="Drops Button"
+                    width={100}
+                    height={35}
+                    className="w-full h-auto object-contain hover:opacity-80 transition-opacity duration-300 brightness-100"
+                    priority
+                    unoptimized
+                  />
+                </motion.div>
+              </Link>
               <motion.a
                 href="#lore"
                 whileHover={{ scale: 1.05 }}
@@ -341,43 +327,7 @@ export default function Home() {
               </motion.button>
               
               {/* Connect Wallet/Profile Button */}
-              {isWalletConnected ? (
-                // Smaller Profile Button
-                <motion.button
-                  onClick={handleConnectWalletClick}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex items-center justify-center w-20 h-auto"
-                >
-                  <Image
-                    src="/Profile_button.png"
-                    alt="Profile"
-                    width={80}
-                    height={28}
-                    className="w-full h-auto object-contain hover:opacity-80 transition-opacity duration-300 brightness-100"
-                    priority
-                    unoptimized
-                  />
-                </motion.button>
-              ) : (
-                // Larger Connect Wallet Button
-                <motion.button
-                  onClick={handleConnectWalletClick}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex items-center justify-center w-28 h-auto"
-          >
-            <Image
-                    src="/ConnectWallet_button.png"
-                    alt="Connect Wallet"
-                    width={110}
-                    height={40}
-                    className="w-full h-auto object-contain hover:opacity-80 transition-opacity duration-300 brightness-100"
-              priority
-              unoptimized
-            />
-                </motion.button>
-              )}
+              <WalletButton />
             </div>
 
             {/* Mobile Menu Button */}
