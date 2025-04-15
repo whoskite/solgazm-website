@@ -1,37 +1,17 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import { ClientLayout } from "@/components/ClientLayout";
-import '@solana/wallet-adapter-react-ui/styles.css';
-import { Toaster } from 'react-hot-toast';
+import './globals.css'
+import '@solana/wallet-adapter-react-ui/styles.css'
+import dynamic from 'next/dynamic'
+import React from 'react'
 
-const inter = Inter({ subsets: ['latin'] });
+// Dynamically import ClientWrapper to avoid SSR issues
+const ClientWrapper = dynamic(() => import('../components/ClientWrapper'), {
+  ssr: false
+})
 
-export const metadata: Metadata = {
-  title: "World of Gazm",
-  description: "Welcome to the World of Gazm",
-  metadataBase: new URL('https://solgazm.vercel.app'),
-  openGraph: {
-    type: 'website',
-    title: 'Solgazm',
-    description: 'Made to Orgasm',
-    siteName: 'Solgazm',
-    images: [
-      {
-        url: '/SocialSharingImage_Solgazm.png',
-        width: 1200,
-        height: 630,
-        alt: 'Solgazm Share Image',
-      }
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Solgazm',
-    description: 'Made to Orgasm',
-    images: ['/SocialSharingImage_Solgazm.png'],
-  },
-};
+export const metadata = {
+  title: 'SOLGAZM',
+  description: 'SOLGAZM NFT Collection',
+}
 
 export default function RootLayout({
   children,
@@ -40,32 +20,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head>
-        <link rel="icon" href="/solgazm-favicon-32x32.png" sizes="32x32" />
-        <link rel="apple-touch-icon" href="/solgazm-favicon-32x32.png" />
-      </head>
-      <body className={inter.className}>
-        <ClientLayout>
+      <body>
+        <ClientWrapper>
           {children}
-        </ClientLayout>
-        <Toaster 
-          position="bottom-right"
-          toastOptions={{
-            style: {
-              background: '#333',
-              color: '#fff',
-              borderRadius: '8px',
-            },
-            success: {
-              duration: 3000,
-              iconTheme: {
-                primary: '#4ade80',
-                secondary: '#333',
-              },
-            },
-          }}
-        />
+        </ClientWrapper>
       </body>
     </html>
-  );
+  )
 }

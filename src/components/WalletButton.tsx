@@ -34,7 +34,6 @@ export const WalletButton: FC = () => {
       } else {
         await disconnect();
         toast.success('Wallet disconnected successfully');
-        localStorage.removeItem('walletConnectedToast');
       }
     } catch (error) {
       console.error('Wallet interaction error:', error);
@@ -45,15 +44,11 @@ export const WalletButton: FC = () => {
   // Show toast when wallet is connected
   useEffect(() => {
     if (connected && publicKey) {
-      const hasShownToast = localStorage.getItem('walletConnectedToast');
-      if (!hasShownToast) {
-        const address = publicKey.toBase58();
-        const shortAddress = `${address.slice(0, 4)}...${address.slice(-4)}`;
-        toast.success(`Connected: ${shortAddress}`, {
-          icon: '🎮',
-        });
-        localStorage.setItem('walletConnectedToast', 'true');
-      }
+      const address = publicKey.toBase58();
+      const shortAddress = `${address.slice(0, 4)}...${address.slice(-4)}`;
+      toast.success(`Connected: ${shortAddress}`, {
+        icon: '🎮',
+      });
     }
   }, [connected, publicKey]);
 

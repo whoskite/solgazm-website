@@ -4,189 +4,25 @@ import React, { useState, useRef, useEffect } from 'react'
 import { motion } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
+import dynamic from 'next/dynamic'
 import { WalletButton } from "@/components/WalletButton"
+import { useAudio } from '@/contexts/AudioContext'
+import { useCursor } from '@/contexts/CursorContext'
+import AudioButton from '@/components/AudioButton'
+
+// Dynamically import WalletMultiButton with no SSR
+const WalletMultiButton = dynamic(
+  () => import('@solana/wallet-adapter-react-ui').then((mod) => mod.WalletMultiButton),
+  { ssr: false }
+);
 
 export default function Home() {
-  const [isMuted, setIsMuted] = useState(true)
+  const { isPlaying, toggleAudio } = useAudio()
+  const { updateCursorType } = useCursor()
   const [hoveredCharacter, setHoveredCharacter] = useState<string | null>(null)
-  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 })
-  const [isClicking, setIsClicking] = useState(false)
-  const audioRef = useRef<HTMLAudioElement>(null)
-  const bubbleAudioRef = useRef<HTMLAudioElement>(null)
-  const insertCoinAudioRef = useRef<HTMLAudioElement>(null)
-  const cursorRef = useRef<HTMLDivElement>(null)
 
-  const toggleMute = () => {
-    const audio = audioRef.current
-    if (audio) {
-      const currentlyMuted = !audio.muted
-      audio.muted = currentlyMuted
-      setIsMuted(currentlyMuted)
-      if (!currentlyMuted && audio.paused) {
-        audio.play().catch(error => {
-          console.error("Error playing audio on unmute:", error)
-          audio.muted = true
-          setIsMuted(true)
-        })
-      }
-      // Also mute/unmute other sounds
-      if (bubbleAudioRef.current) {
-        bubbleAudioRef.current.muted = currentlyMuted;
-      }
-      if (insertCoinAudioRef.current) {
-        insertCoinAudioRef.current.muted = currentlyMuted;
-      }
-    }
-  }
-
-  useEffect(() => {
-    const audio = audioRef.current
-    if (audio) {
-      audio.volume = 1
-      if (!audio.muted) {
-        audio.muted = true
-      }
-      setIsMuted(true)
-      console.log("Audio element ready. Click unmute to play.")
-    }
-  }, [])
-
-  // Custom cursor implementation
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setCursorPosition({ x: e.clientX, y: e.clientY });
-    };
-
-    const handleMouseDown = (e: MouseEvent) => {
-      setIsClicking(true);
-      // Check if the click is on the connect wallet button
-      const target = e.target as HTMLElement;
-      const isConnectWalletButton = target.closest('img[alt="Connect Wallet"]') !== null ||
-                                   target.closest('button')?.querySelector('img[alt="Connect Wallet"]') !== null ||
-                                   target.closest('button')?.querySelector('img[src="/ConnectWallet_button.png"]') !== null;
-      
-      // Play bubble sound if not clicking connect wallet button and not muted
-      const bubbleSound = bubbleAudioRef.current;
-      if (!isConnectWalletButton && bubbleSound && !bubbleSound.muted) {
-        bubbleSound.currentTime = 0; // Reset sound to start
-        bubbleSound.play().catch(error => {
-          console.error("Error playing bubble sound:", error);
-        });
-      }
-    };
-
-    const handleMouseUp = () => {
-      setIsClicking(false);
-    };
-    
-    // Prevent right-click context menu
-    const handleContextMenu = (e: MouseEvent) => {
-      e.preventDefault();
-      return false;
-    };
-
-    // Add event listeners
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mousedown', handleMouseDown);
-    document.addEventListener('mouseup', handleMouseUp);
-    document.addEventListener('contextmenu', handleContextMenu);
-
-    // Hide the default cursor
-    document.body.style.cursor = 'none';
-    
-    // Apply to all elements that should have a pointer cursor
-    const elements = document.querySelectorAll('a, button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]');
-    elements.forEach(el => {
-      (el as HTMLElement).style.cursor = 'none';
-    });
-
-    return () => {
-      // Clean up event listeners
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mousedown', handleMouseDown);
-      document.removeEventListener('mouseup', handleMouseUp);
-      document.removeEventListener('contextmenu', handleContextMenu);
-      
-      // Restore default cursor
-      document.body.style.cursor = 'auto';
-    };
-  }, []);
   return (
     <div className="h-screen overflow-hidden relative">
-      {/* Custom Cursor */}
-      <div 
-        ref={cursorRef}
-        className="fixed pointer-events-none z-50"
-        style={{
-          left: `${cursorPosition.x}px`,
-          top: `${cursorPosition.y}px`,
-          transform: 'translate(-15px, -15px)'
-        }}
-      >
-        <Image
-          src={isClicking ? "/handcursor_solgazm_2.png" : "/handcursor_solgazm1.png"}
-          alt="Cursor"
-          width={45}
-          height={45}
-          className="w-auto h-auto max-w-[45px]"
-          priority
-        />
-      </div>
-
-      {/* SVG Filter for Graffiti Texture */}
-      <svg width="0" height="0" className="absolute">
-        <filter id="gritty-texture" x="-50%" y="-50%" width="200%" height="200%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" result="noise" />
-          <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G" />
-          <feGaussianBlur stdDeviation="0.5" />
-        </filter>
-      </svg>
-
-      {/* CSS Animations */}
-      <style jsx global>{`
-        @keyframes float {
-          0% {
-            transform: translateY(0) translateX(0);
-            opacity: 0;
-          }
-          25% {
-            opacity: 0.7;
-          }
-          50% {
-            transform: translateY(-15px) translateX(5px);
-          }
-          75% {
-            transform: translateY(-5px) translateX(-10px);
-            opacity: 0.8;
-          }
-          100% {
-            transform: translateY(-20px) translateX(0);
-            opacity: 0;
-          }
-        }
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
-        }
-      `}</style>
-
-      {/* Background Audio */}
-      <audio ref={audioRef} loop preload="auto" playsInline muted>
-        <source src="/AUDIO_3722.mp3" type="audio/mpeg" />
-        Your browser does not support the audio element.
-      </audio>
-
-      {/* Bubble Click Sound Effect */}
-      <audio ref={bubbleAudioRef} preload="auto" playsInline muted>
-        <source src="/Bubble Effect.mp3" type="audio/mpeg" />
-        Your browser does not support the audio element.
-      </audio>
-
-      {/* Insert Coin Sound Effect */}
-      <audio ref={insertCoinAudioRef} preload="auto" playsInline muted>
-        <source src="/Insert_Coin.wav" type="audio/wav" />
-        Your browser does not support the audio element.
-      </audio>
-      
       {/* Background Image */}
       <div className="fixed inset-0 w-full h-full z-0">
         <Image
@@ -203,29 +39,26 @@ export default function Home() {
       {/* Content Container */}
       <main className="relative min-h-screen z-10">
         {/* Navigation Header */}
-        <motion.header 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-sm"
-        >
+        <header className="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4 flex items-center justify-between py-3">
             {/* Left Section - Logo */}
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-[80px] md:w-[100px] cursor-pointer"
-            >
-              <Image
-                src="/1_World of Gazm.png"
-                alt="World of Gazm"
-                width={100}
-                height={100}
-                className="w-full h-auto object-contain"
-                priority
-                unoptimized
-              />
-            </motion.div>
+            <Link href="/">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-[80px] md:w-[100px] cursor-pointer"
+              >
+                <Image
+                  src="/1_World of Gazm.png"
+                  alt="World of Gazm"
+                  width={100}
+                  height={100}
+                  className="w-full h-auto object-contain"
+                  priority
+                  unoptimized
+                />
+              </motion.div>
+            </Link>
 
             {/* Center Section - Navigation */}
             <nav className="hidden md:flex items-center space-x-12">
@@ -265,13 +98,13 @@ export default function Home() {
                 href="#lore"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="flex items-center justify-center w-28 h-auto"
+                className="flex items-center justify-center w-24 h-auto"
               >
                 <Image
                   src="/Lore_button.png"
                   alt="Lore Button"
-                  width={100}
-                  height={35}
+                  width={80}
+                  height={28}
                   className="w-full h-auto object-contain hover:opacity-80 transition-opacity duration-300 brightness-100"
                   priority
                   unoptimized
@@ -296,38 +129,12 @@ export default function Home() {
             </nav>
 
             {/* Right Section - Connect Wallet and Audio Controls */}
-            <div className="flex items-center space-x-6 mr-4">
+            <div className="flex items-center gap-4">
               {/* Audio Button */}
-              <motion.button
-                onClick={toggleMute}
-                className="hidden md:flex items-center justify-center w-12 h-12 p-1 rounded-full transition-colors duration-300"
-                title={isMuted ? "Unmute" : "Mute"}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                {isMuted ? (
-                  <Image 
-                    src="/Mute_Icon.png" 
-                    alt="Unmute" 
-                    width={40}
-                    height={40}
-                    className="w-full h-full object-contain"
-                    unoptimized
-                  />
-                ) : (
-                  <Image 
-                    src="/Speaker_Icon.png" 
-                    alt="Mute" 
-                    width={40}
-                    height={40}
-                    className="w-full h-full object-contain"
-                    unoptimized
-                  />
-                )}
-              </motion.button>
+              <AudioButton />
               
               {/* Connect Wallet/Profile Button */}
-              <WalletButton />
+              <WalletMultiButton />
             </div>
 
             {/* Mobile Menu Button */}
@@ -345,7 +152,7 @@ export default function Home() {
               </svg>
             </motion.button>
           </div>
-        </motion.header>
+        </header>
 
         {/* Hero Section */}
         <div className="h-screen flex items-center justify-center overflow-hidden">
@@ -517,7 +324,7 @@ export default function Home() {
                 {/* Start Your Journey Button - Overlapping Characters */}
                 <motion.div
                   className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none"
-                  style={{ paddingTop: "15%" }}
+                  style={{ paddingTop: "5%" }}
                 >
                   <motion.a
                     href="#journey"

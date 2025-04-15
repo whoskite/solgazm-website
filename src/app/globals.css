@@ -15,6 +15,15 @@
   -webkit-user-drag: none;
 }
 
+/* Hide default cursor */
+* {
+  cursor: none !important;
+}
+
+*:hover {
+  cursor: none !important;
+}
+
 /* Reset default styles */
 html, body {
   margin: 0;
@@ -25,9 +34,31 @@ html, body {
 }
 
 body {
-  color: white;
-  background-color: black;
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
   position: relative;
+}
+
+/* Hide cursor on interactive elements */
+a, button, [role="button"], 
+input[type="button"], 
+input[type="submit"], 
+input[type="reset"],
+.cursor-pointer {
+  cursor: none !important;
+}
+
+a:hover, button:hover, [role="button"]:hover,
+input[type="button"]:hover,
+input[type="submit"]:hover,
+input[type="reset"]:hover,
+.cursor-pointer:hover {
+  cursor: none !important;
 }
 
 @font-face {
@@ -64,9 +95,9 @@ body {
 }
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 0, 0, 0;
+  --background-end-rgb: 0, 0, 0;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -100,4 +131,14 @@ body {
 
 .animate-float {
   animation: float 3s ease-in-out infinite;
+}
+
+/* Make sure interactive elements also have no cursor */
+a, button, input, select, textarea {
+  cursor: none !important;
+}
+
+/* Handle Tailwind's cursor utilities */
+.cursor-pointer {
+  cursor: none !important;
 }
