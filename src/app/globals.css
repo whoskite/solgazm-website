@@ -142,3 +142,128 @@ a, button, input, select, textarea {
 .cursor-pointer {
   cursor: none !important;
 }
+
+/* Main wallet button styling */
+.wallet-adapter-button-trigger {
+  background: transparent !important;
+  padding: 0 !important;
+  height: 45px !important;
+  width: 140px !important;
+  border: none !important;
+  position: relative !important;
+  display: block !important;
+  background-image: url('/ConnectWallet_button.png') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  color: transparent !important;
+  font-size: 0 !important;
+  transition: all 0.3s ease !important;
+}
+
+.wallet-adapter-button-trigger:hover {
+  filter: brightness(1.2) drop-shadow(0 0 8px rgba(139, 61, 255, 0.5)) !important;
+  transform: scale(1.05) !important;
+}
+
+.wallet-adapter-button-trigger:active {
+  transform: scale(0.98) !important;
+}
+
+.wallet-adapter-button-trigger span {
+  display: none !important;
+}
+
+/* Hide text content but keep button functional */
+.wallet-adapter-button {
+  color: transparent !important;
+  font-size: 0 !important;
+}
+
+.wallet-adapter-button span {
+  display: none !important;
+}
+
+/* Ensure custom cursor is visible in modal */
+.wallet-adapter-modal,
+.wallet-adapter-modal-wrapper,
+.wallet-adapter-modal-container,
+.wallet-adapter-modal-list,
+.wallet-adapter-modal-list .wallet-adapter-button,
+.wallet-adapter-modal-button-close {
+  cursor: none !important;
+}
+
+.wallet-adapter-modal *:hover {
+  cursor: none !important;
+}
+
+/* Wallet Modal Styling */
+.wallet-adapter-modal {
+  background: rgba(0, 0, 0, 0.85) !important;
+  backdrop-filter: blur(8px) !important;
+  z-index: 40 !important; /* Ensure modal is below cursor */
+}
+
+.wallet-adapter-modal-wrapper {
+  background: #1a1f2e !important;
+  border: 1px solid #8b3dff !important;
+  border-radius: 12px !important;
+}
+
+.wallet-adapter-modal-title {
+  color: white !important;
+  font-family: 'Press Start 2P', cursive !important;
+  font-size: 16px !important;
+}
+
+.wallet-adapter-modal-title::before {
+  content: 'Connect Wallet' !important;
+}
+
+.wallet-adapter-modal-title span {
+  display: none !important;
+}
+
+.wallet-adapter-modal-list {
+  margin: 0 0 4px !important;
+}
+
+.wallet-adapter-modal-list .wallet-adapter-button {
+  font-family: 'Press Start 2P', cursive !important;
+  font-size: 12px !important;
+  background: transparent !important;
+  height: auto !important;
+  width: 100% !important;
+  padding: 12px !important;
+  margin: 4px 0 !important;
+  justify-content: flex-start !important;
+  border-radius: 8px !important;
+}
+
+.wallet-adapter-modal-list .wallet-adapter-button:hover {
+  background: #8b3dff33 !important;
+}
+
+.wallet-adapter-modal-button-close {
+  background: transparent !important;
+  color: white !important;
+}
+
+.wallet-adapter-dropdown-list {
+  background: #000000e6 !important;
+  border: 1px solid #8b3dff !important;
+  border-radius: 8px !important;
+}
+
+.wallet-adapter-dropdown-list-item {
+  background: transparent !important;
+  color: white !important;
+  font-family: 'Press Start 2P', cursive !important;
+  font-size: 12px !important;
+  padding: 8px 16px !important;
+}
+
+.wallet-adapter-dropdown-list-item:hover {
+  background: #8b3dff33 !important;
+}

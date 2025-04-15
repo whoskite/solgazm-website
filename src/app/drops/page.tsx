@@ -129,8 +129,8 @@ export default function Drops() {
               {/* Audio Button */}
               <AudioButton />
               
-              {/* Connect Wallet/Profile Button */}
-              <WalletMultiButton />
+              {/* Connect Wallet Button */}
+              <WalletMultiButton className="wallet-adapter-button-custom" />
             </div>
 
             {/* Mobile Menu Button */}
