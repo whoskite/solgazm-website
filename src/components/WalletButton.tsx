@@ -1,78 +1,67 @@
 'use client';
 
-import { FC, useRef, useCallback } from 'react';
+import { FC, useRef, useCallback, useEffect } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
-// Add type definition for Phantom
-declare global {
-  interface Window {
-    phantom?: {
-      solana?: {
-        isPhantom?: boolean;
-      };
+// Define the Phantom wallet type
+interface PhantomWindow extends Window {
+  phantom?: {
+    solana?: {
+      isPhantom?: boolean;
     };
-  }
+  };
 }
 
+declare const window: PhantomWindow;
+
 export const WalletButton: FC = () => {
-  const { connected, disconnect } = useWallet();
+  const { connected, connecting, disconnect, publicKey } = useWallet();
   const { setVisible } = useWalletModal();
-  const insertCoinAudioRef = useRef<HTMLAudioElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
-  const handleClick = useCallback(() => {
-    // Play insert coin sound if not muted
-    const insertCoinSound = insertCoinAudioRef.current;
-    if (insertCoinSound && !insertCoinSound.muted) {
-      insertCoinSound.currentTime = 0;
-      insertCoinSound.play().catch(error => {
-        console.error("Error playing insert coin sound:", error);
-      });
-    }
+  const handleClick = useCallback(async () => {
+    try {
+      if (audioRef.current) {
+        audioRef.current.play().catch(console.error);
+      }
 
-    if (connected) {
-      disconnect();
-    } else {
-      setVisible(true);
+      if (!connected) {
+        setVisible(true);
+      } else {
+        await disconnect();
+      }
+    } catch (error) {
+      console.error('Wallet interaction error:', error);
     }
   }, [connected, disconnect, setVisible]);
 
+  // Log connection state changes for debugging
+  useEffect(() => {
+    if (connected) {
+      console.log('Wallet connected:', publicKey?.toBase58());
+    }
+  }, [connected, publicKey]);
+
   return (
     <>
+      <audio ref={audioRef} src="/Insert_Coin.wav" preload="auto" />
       <motion.div
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        className="flex items-center justify-center w-28 h-auto cursor-pointer"
         onClick={handleClick}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        style={{ cursor: 'pointer' }}
       >
-        {connected ? (
-          <Image
-            src="/Profile_button.png"
-            alt="Profile"
-            width={80}
-            height={28}
-            className="w-full h-auto object-contain hover:opacity-80 transition-opacity duration-300 brightness-100"
-            priority
-            unoptimized
-          />
-        ) : (
-          <Image
-            src="/ConnectWallet_button.png"
-            alt="Connect Wallet"
-            width={110}
-            height={40}
-            className="w-full h-auto object-contain hover:opacity-80 transition-opacity duration-300 brightness-100"
-            priority
-            unoptimized
-          />
-        )}
+        <Image
+          src={connected ? '/Profile_button.png' : '/ConnectWallet_button.png'}
+          alt={connected ? 'Profile Button' : 'Connect Wallet Button'}
+          width={200}
+          height={50}
+          priority
+        />
       </motion.div>
-      <audio ref={insertCoinAudioRef} preload="auto" playsInline>
-        <source src="/Insert_Coin.wav" type="audio/wav" />
-        Your browser does not support the audio element.
-      </audio>
     </>
   );
 }; 
