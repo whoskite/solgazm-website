@@ -9,18 +9,10 @@ import { useAudio } from '@/contexts/AudioContext'
 
 export default function Drops() {
   const { isPlaying, toggleAudio, playBubbleSound } = useAudio()
-  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 })
-  const [isClicking, setIsClicking] = useState(false)
-  const cursorRef = useRef<HTMLDivElement>(null)
 
   // Custom cursor implementation
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setCursorPosition({ x: e.clientX, y: e.clientY });
-    };
-
     const handleMouseDown = (e: MouseEvent) => {
-      setIsClicking(true);
       const target = e.target as HTMLElement;
       const isConnectWalletButton = target.closest('img[alt="Connect Wallet"]') !== null ||
                                    target.closest('button')?.querySelector('img[alt="Connect Wallet"]') !== null ||
@@ -31,43 +23,15 @@ export default function Drops() {
       }
     };
 
-    const handleMouseUp = () => {
-      setIsClicking(false);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mousedown', handleMouseDown);
-    document.addEventListener('mouseup', handleMouseUp);
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mousedown', handleMouseDown);
-      document.removeEventListener('mouseup', handleMouseUp);
     };
   }, []);
 
   return (
     <div className="h-screen overflow-hidden relative">
-      {/* Custom Cursor */}
-      <div 
-        ref={cursorRef}
-        className="fixed pointer-events-none z-50"
-        style={{
-          left: `${cursorPosition.x}px`,
-          top: `${cursorPosition.y}px`,
-          transform: 'translate(-15px, -15px)'
-        }}
-      >
-        <Image
-          src={isClicking ? "/handcursor_solgazm_2.png" : "/handcursor_solgazm1.png"}
-          alt="Cursor"
-          width={45}
-          height={45}
-          className="w-auto h-auto"
-          priority
-        />
-      </div>
-
       {/* Background Image */}
       <div className="fixed inset-0 w-full h-full z-0">
         <Image
