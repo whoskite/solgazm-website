@@ -7,6 +7,8 @@ interface AudioContextType {
   toggleAudio: () => void;
   playBubbleSound: () => void;
   playInsertCoinSound: () => void;
+  playFloatingSound: () => void;
+  playSuccessSound: () => void;
 }
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
@@ -16,6 +18,8 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   const backgroundAudioRef = useRef<HTMLAudioElement | null>(null);
   const bubbleAudioRef = useRef<HTMLAudioElement | null>(null);
   const insertCoinAudioRef = useRef<HTMLAudioElement | null>(null);
+  const floatingAudioRef = useRef<HTMLAudioElement | null>(null);
+  const successAudioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     // Create audio elements only once
@@ -28,6 +32,14 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     }
     if (!insertCoinAudioRef.current) {
       insertCoinAudioRef.current = new Audio('/Insert_Coin.wav');
+    }
+    if (!floatingAudioRef.current) {
+      floatingAudioRef.current = new Audio('/floating_sound.wav');
+      floatingAudioRef.current.volume = 0.3;
+    }
+    if (!successAudioRef.current) {
+      successAudioRef.current = new Audio('/Success_WorldofGazm.MP3');
+      successAudioRef.current.volume = 0.7;
     }
 
     // Check local storage for audio state
@@ -80,8 +92,29 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const playFloatingSound = () => {
+    if (floatingAudioRef.current && isPlaying) {
+      floatingAudioRef.current.currentTime = 0;
+      floatingAudioRef.current.play().catch(console.error);
+    }
+  };
+
+  const playSuccessSound = () => {
+    if (successAudioRef.current && isPlaying) {
+      successAudioRef.current.currentTime = 0;
+      successAudioRef.current.play().catch(console.error);
+    }
+  };
+
   return (
-    <AudioContext.Provider value={{ isPlaying, toggleAudio, playBubbleSound, playInsertCoinSound }}>
+    <AudioContext.Provider value={{ 
+      isPlaying, 
+      toggleAudio, 
+      playBubbleSound, 
+      playInsertCoinSound,
+      playFloatingSound,
+      playSuccessSound
+    }}>
       {children}
     </AudioContext.Provider>
   );

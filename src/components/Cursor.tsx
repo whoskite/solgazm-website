@@ -11,7 +11,7 @@ const Cursor: React.FC = () => {
       style={{
         left: `${cursorPosition.x}px`,
         top: `${cursorPosition.y}px`,
-        transform: 'translate(-15%, -15%)',
+        transform: 'translate(-43%, -15%)',
         width: '50px',
         height: '50px'
       }}

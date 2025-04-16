@@ -3,10 +3,14 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { ConnectionProvider, WalletProvider as SolanaWalletProvider } from '@solana/wallet-adapter-react';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
-import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
-import { clusterApiUrl } from '@solana/web3.js';
+import { 
+  PhantomWalletAdapter,
+  TrustWalletAdapter,
+  SolflareWalletAdapter,
+} from '@solana/wallet-adapter-wallets';
+import { clusterApiUrl, Connection, Commitment } from '@solana/web3.js';
 import { toast } from 'react-hot-toast';
-import { CustomWalletModal } from '@/components/CustomWalletModal';
+import { WalletError } from '@solana/wallet-adapter-base';
 
 // Create context
 const WalletContext = createContext<{
@@ -20,9 +24,48 @@ const WalletContext = createContext<{
 export function WalletProvider({ children }: { children: React.ReactNode }) {
   const [isConnected, setIsConnected] = useState(false);
 
-  // Set up wallet configuration
+  // Set up wallet configuration with proper commitment
+  const commitment: Commitment = 'confirmed';
   const endpoint = useMemo(() => clusterApiUrl('mainnet-beta'), []);
-  const wallets = useMemo(() => [new PhantomWalletAdapter()], []);
+  
+  // Create connection
+  const connection = useMemo(
+    () => new Connection(endpoint, { commitment }),
+    [endpoint]
+  );
+
+  // Initialize wallets with configuration
+  const wallets = useMemo(
+    () => [
+      new PhantomWalletAdapter({ connection }),
+      new TrustWalletAdapter(),
+      new SolflareWalletAdapter(),
+    ],
+    [connection]
+  );
+
+  const handleError = (error: WalletError) => {
+    console.error('Wallet error:', error);
+    
+    if (error.name === 'WalletNotReadyError') {
+      toast.error('Please unlock your wallet and try again');
+    } else if (error.name === 'WalletConnectionError') {
+      toast.error('Failed to connect to wallet. Please try again.');
+      setIsConnected(false);
+    } else if (error.name === 'WalletDisconnectedError') {
+      toast.error('Wallet disconnected. Please reconnect.');
+      setIsConnected(false);
+    } else if (error.name === 'WalletTimeoutError') {
+      toast.error('Wallet connection timed out. Please try again.');
+      setIsConnected(false);
+    } else if (error.name === 'WalletNotSelectedError') {
+      // This is a normal part of the flow, don't show error
+      setIsConnected(false);
+    } else {
+      toast.error(error.message || 'An unexpected wallet error occurred');
+      setIsConnected(false);
+    }
+  };
 
   // Check local storage for connection state on mount
   useEffect(() => {
@@ -35,19 +78,19 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   // Save connection state to local storage
   useEffect(() => {
     localStorage.setItem('walletConnected', isConnected.toString());
-    if (isConnected) {
-      toast.success('Wallet connected successfully!');
-    }
   }, [isConnected]);
 
   return (
-    <ConnectionProvider endpoint={endpoint}>
-      <SolanaWalletProvider wallets={wallets} autoConnect={true}>
+    <ConnectionProvider endpoint={endpoint} config={{ commitment }}>
+      <SolanaWalletProvider 
+        wallets={wallets}
+        autoConnect={false}
+        onError={handleError}
+      >
         <WalletModalProvider>
           <WalletContext.Provider value={{ isConnected, setIsConnected }}>
             {children}
           </WalletContext.Provider>
-          <CustomWalletModal />
         </WalletModalProvider>
       </SolanaWalletProvider>
     </ConnectionProvider>

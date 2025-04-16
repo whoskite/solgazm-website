@@ -23,5 +23,7 @@ declare module '@/contexts/AudioContext' {
     toggleAudio: () => void;
     playBubbleSound: () => void;
     playInsertCoinSound: () => void;
+    playFloatingSound: () => void;
+    playSuccessSound: () => void;
   };
 } 

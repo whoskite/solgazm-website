@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAudio } from '@/contexts/AudioContext';
 import { WalletButton } from './WalletButton';
+import { motion } from 'framer-motion';
 
 export const Navigation: FC = () => {
   const { isPlaying, toggleAudio } = useAudio();
@@ -12,7 +13,11 @@ export const Navigation: FC = () => {
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between py-3">
         {/* Left Section - Logo */}
         <Link href="/">
-          <div className="w-[80px] md:w-[100px] cursor-pointer">
+          <motion.div 
+            className="w-[80px] md:w-[100px] cursor-pointer"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
             <Image
               src="/1_World of Gazm.png"
               alt="World of Gazm"
@@ -22,64 +27,77 @@ export const Navigation: FC = () => {
               priority
               unoptimized
             />
-          </div>
+          </motion.div>
         </Link>
 
         {/* Center Section - Navigation */}
-        <nav className="hidden md:flex items-center space-x-12">
-          <Link href="/" className="flex items-center justify-center w-28 h-auto">
-            <Image
-              src="/Home.png"
-              alt="Home Button"
-              width={100}
-              height={35}
-              className="w-full h-auto object-contain hover:opacity-80 transition-opacity duration-300 brightness-100"
-              priority
-              unoptimized
-            />
-          </Link>
-          <Link href="/drops" className="flex items-center justify-center w-28 h-auto">
-            <Image
-              src="/Drop_button.png"
-              alt="Drops Button"
-              width={100}
-              height={35}
-              className="w-full h-auto object-contain hover:opacity-80 transition-opacity duration-300 brightness-100"
-              priority
-              unoptimized
-            />
-          </Link>
-          <Link href="/lore" className="flex items-center justify-center w-28 h-auto">
-            <Image
-              src="/Lore_button.png"
-              alt="Lore Button"
-              width={100}
-              height={35}
-              className="w-full h-auto object-contain hover:opacity-80 transition-opacity duration-300 brightness-100"
-              priority
-              unoptimized
-            />
-          </Link>
-          <Link href="/academy" className="flex items-center justify-center w-28 h-auto">
-            <Image
-              src="/Academy_button.png"
-              alt="Academy Button"
-              width={100}
-              height={35}
-              className="w-full h-auto object-contain hover:opacity-80 transition-opacity duration-300 brightness-100"
-              priority
-              unoptimized
-            />
-          </Link>
+        <nav className="hidden md:flex items-center space-x-4">
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link href="/" className="flex items-center justify-center w-28 h-auto">
+              <Image
+                src="/Home.png"
+                alt="Home Button"
+                width={100}
+                height={35}
+                className="w-full h-auto object-contain hover:opacity-80 transition-opacity duration-300 brightness-100"
+                priority
+                unoptimized
+              />
+            </Link>
+          </motion.div>
+          
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link href="/drops" className="flex items-center justify-center w-28 h-auto">
+              <Image
+                src="/Drop_button.png"
+                alt="Drops Button"
+                width={100}
+                height={35}
+                className="w-full h-auto object-contain hover:opacity-80 transition-opacity duration-300 brightness-100"
+                priority
+                unoptimized
+              />
+            </Link>
+          </motion.div>
+          
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link href="/lore" className="flex items-center justify-center w-28 h-auto">
+              <Image
+                src="/Lore_button.png"
+                alt="Lore Button"
+                width={100}
+                height={35}
+                className="w-full h-auto object-contain hover:opacity-80 transition-opacity duration-300 brightness-100"
+                priority
+                unoptimized
+              />
+            </Link>
+          </motion.div>
+          
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link href="/academy" className="flex items-center justify-center w-28 h-auto">
+              <Image
+                src="/Academy_button.png"
+                alt="Academy Button"
+                width={100}
+                height={35}
+                className="w-full h-auto object-contain hover:opacity-80 transition-opacity duration-300 brightness-100"
+                priority
+                unoptimized
+              />
+            </Link>
+          </motion.div>
         </nav>
 
         {/* Right Section - Connect Wallet and Audio Controls */}
-        <div className="flex items-center space-x-6 mr-4">
+        <div className="flex items-center space-x-4">
           {/* Audio Button */}
-          <button
+          <motion.button
             onClick={toggleAudio}
             className="hidden md:flex items-center justify-center w-12 h-12 p-1 rounded-full transition-colors duration-300"
             title={isPlaying ? "Mute" : "Unmute"}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
             {!isPlaying ? (
               <Image 
@@ -100,15 +118,17 @@ export const Navigation: FC = () => {
                 unoptimized
               />
             )}
-          </button>
+          </motion.button>
           
           {/* Wallet Button */}
           <WalletButton />
         </div>
 
         {/* Mobile Menu Button */}
-        <button
+        <motion.button
           className="md:hidden p-2 text-white hover:text-yellow-400 transition-colors duration-300 absolute right-4"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
           <svg
             className="w-6 h-6"
@@ -118,7 +138,7 @@ export const Navigation: FC = () => {
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
-        </button>
+        </motion.button>
       </div>
     </header>
   );
