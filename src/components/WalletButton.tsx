@@ -10,7 +10,7 @@ import { motion } from 'framer-motion';
 import '@/styles/WalletButton.css';
 
 export const WalletButton: FC = () => {
-  const { connecting, connected, publicKey, disconnect } = useWallet();
+  const { connecting, connected, publicKey, disconnect, wallet: selectedWallet } = useWallet();
   const { setVisible } = useCustomWalletModal();
   const { playInsertCoinSound } = useAudio();
   
@@ -54,7 +54,14 @@ export const WalletButton: FC = () => {
             className="wallet-address-button"
             onClick={handleClick}
           >
-            {publicKey ? formatAddress(publicKey.toBase58()) : 'Connected'}
+            {publicKey ? (
+              <>
+                <span className="font-bold mr-2">
+                  {selectedWallet?.adapter.name || 'Wallet'}
+                </span>
+                {formatAddress(publicKey.toBase58())}
+              </>
+            ) : 'Connected'}
           </button>
           <button
             className="disconnect-button ml-2 bg-red-600 hover:bg-red-700 p-2 rounded-full transition-colors flex items-center justify-center"

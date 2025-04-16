@@ -60,6 +60,7 @@ export const Navigation: FC = () => {
             </Link>
           </motion.div>
           
+          {/*
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Link href="/lore" className="flex items-center justify-center w-28 h-auto">
               <Image
@@ -73,7 +74,6 @@ export const Navigation: FC = () => {
               />
             </Link>
           </motion.div>
-          
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Link href="/academy" className="flex items-center justify-center w-28 h-auto">
               <Image
@@ -87,6 +87,7 @@ export const Navigation: FC = () => {
               />
             </Link>
           </motion.div>
+          */}
         </nav>
 
         {/* Right Section - Connect Wallet and Audio Controls */}

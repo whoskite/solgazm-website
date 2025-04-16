@@ -20,6 +20,15 @@ const WalletContext = createContext<{
   setIsConnected: () => {},
 });
 
+// Utility to detect Brave and Phantom wallets
+function getSolanaWalletType() {
+  const solana = (window as any)?.solana;
+  return {
+    isPhantom: !!solana?.isPhantom && !solana?.isBraveWallet,
+    isBrave: !!solana?.isBraveWallet,
+  };
+}
+
 export function WalletProvider({ children }: { children: React.ReactNode }) {
   const [isConnected, setIsConnected] = useState(false);
 
@@ -34,25 +43,19 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   );
 
   // Initialize wallets with configuration
-  const wallets = useMemo(
-    () => {
-      // Check if we're in Brave browser with Solana wallet
-      const isBrave = (window as any)?.solana?.isBraveWallet;
-      
-      // If we're in Brave, only show Phantom
-      // This is because Brave's built-in wallet is detected as Phantom
-      if (isBrave) {
-        return [new PhantomWalletAdapter()];
+  const wallets = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      const { isPhantom, isBrave } = getSolanaWalletType();
+      const walletList = [];
+      if (isPhantom) walletList.push(new PhantomWalletAdapter());
+      if (isBrave) walletList.push(new PhantomWalletAdapter()); // Use a custom Brave adapter if available
+      if (!isPhantom && !isBrave) {
+        walletList.push(new PhantomWalletAdapter(), new TrustWalletAdapter());
       }
-      
-      // Otherwise show both Phantom and Trust
-      return [
-        new PhantomWalletAdapter(),
-        new TrustWalletAdapter()
-      ];
-    },
-    []
-  );
+      return walletList;
+    }
+    return [new PhantomWalletAdapter(), new TrustWalletAdapter()];
+  }, []);
 
   const handleError = (error: WalletError) => {
     console.error('Wallet error:', error);

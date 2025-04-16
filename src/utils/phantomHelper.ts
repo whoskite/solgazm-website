@@ -6,11 +6,29 @@ import { PublicKey } from '@solana/web3.js';
 import { useWallet } from '@solana/wallet-adapter-react';
 
 /**
- * Check if Phantom is installed and available
+ * Check if Brave wallet is installed and available
+ */
+export function isBraveInstalled(): boolean {
+  const solana = (window as any).solana;
+  return solana && solana.isBraveWallet;
+}
+
+/**
+ * Get the current Solana wallet type (phantom, brave, or none)
+ */
+export function getCurrentSolanaWalletType(): 'phantom' | 'brave' | 'none' {
+  const solana = (window as any).solana;
+  if (solana?.isBraveWallet) return 'brave';
+  if (solana?.isPhantom) return 'phantom';
+  return 'none';
+}
+
+/**
+ * Check if Phantom is installed and available (not Brave)
  */
 export function isPhantomInstalled(): boolean {
   const solana = (window as any).solana;
-  return solana && solana.isPhantom;
+  return solana && solana.isPhantom && !solana.isBraveWallet;
 }
 
 /**

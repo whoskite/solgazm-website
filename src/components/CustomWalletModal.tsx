@@ -7,7 +7,7 @@ import { WalletReadyState, WalletName } from '@solana/wallet-adapter-base';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { useAudio } from '@/contexts/AudioContext';
-import { connectToPhantomDirectly, isPhantomInstalled } from '@/utils/phantomHelper';
+import { connectToPhantomDirectly, isPhantomInstalled, isBraveInstalled, getCurrentSolanaWalletType } from '@/utils/phantomHelper';
 import { useCustomWalletModal } from './WalletProvider';
 
 interface WalletOptionProps {
@@ -112,12 +112,17 @@ export const CustomWalletModal: FC = () => {
     }
   }, [connectingWallet]);
 
-  // Modify wallet list to show correct names - without Brave handling
+  // Modify wallet list to show correct names - with Brave handling
   const modifiedWallets = useMemo(() => {
     return wallets.map(wallet => {
+      let displayName = wallet.adapter.name;
+      // If Brave is installed and this is Phantom adapter, label as Brave
+      if (isBraveInstalled() && wallet.adapter.name === 'Phantom') {
+        displayName = 'Brave';
+      }
       return {
         ...wallet,
-        displayName: wallet.adapter.name
+        displayName,
       };
     });
   }, [wallets]);
@@ -195,18 +200,28 @@ export const CustomWalletModal: FC = () => {
               let tries = 0;
               while (tries < 40) { // up to 2 seconds
                 const current = wallets.find(w => w.adapter.name === walletName);
-                if (current && current === selectedWallet && current.readyState === WalletReadyState.Installed) {
+                if (
+                  current &&
+                  selectedWallet &&
+                  current.adapter.name === selectedWallet.adapter.name &&
+                  current.readyState === WalletReadyState.Installed &&
+                  selectedWallet.adapter
+                ) {
                   break;
                 }
                 await new Promise(resolve => setTimeout(resolve, 50));
                 tries++;
               }
               // Now tell the adapter to connect to the selected wallet
-              await connect().catch(err => {
-                console.warn('Adapter connect after direct connection had an issue:', err);
-                // Continue anyway since we have direct connection
-              });
-              
+              try {
+                await connect();
+              } catch (err: any) {
+                if (err.name === 'WalletNotSelectedError') {
+                  toast.error('Wallet not selected. Please try again.');
+                  return;
+                }
+                throw err;
+              }
               console.log('Wallet adapter state synced after direct connection');
             } catch (syncError) {
               console.error('Error syncing adapter state:', syncError);
@@ -359,6 +374,7 @@ export const CustomWalletModal: FC = () => {
             <div className="mb-6 text-center">
               <p className="text-[#00E599] text-lg mb-2">Wallet Connected</p>
               <p className="text-white/80 text-sm break-all">
+                <span className="font-bold mr-2">{selectedWallet?.adapter.name || 'Wallet'}</span>
                 {publicKey.toBase58()}
               </p>
             </div>
