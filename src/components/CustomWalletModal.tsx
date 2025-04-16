@@ -82,7 +82,7 @@ export const CustomWalletModal: FC = () => {
           {/* Close button */}
           <button
             onClick={() => setVisible(false)}
-            className="absolute top-6 right-6 text-white/70 hover:text-white transition-colors z-10"
+            className="absolute top-10 right-14 text-white/70 hover:text-white transition-colors z-10"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M18 6L6 18M6 6l12 12" />
@@ -90,21 +90,8 @@ export const CustomWalletModal: FC = () => {
           </button>
 
           <div className="px-12 py-11">
-            {/* Logo */}
-            <div className="flex justify-center mb-6">
-              <Image
-                src="/WORLDOFGAZM_LOGO.png"
-                alt="World of Gazm"
-                width={280}
-                height={112}
-                className="w-auto h-auto object-contain"
-                priority
-                unoptimized
-              />
-            </div>
-
             {/* Connect to Enter Logo */}
-            <div className="flex justify-center mb-8">
+            <div className="flex justify-center mb-4">
               <Image
                 src="/ConnectToEnter_WorldofGazm.png"
                 alt="Connect to Enter"
