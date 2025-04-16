@@ -5,8 +5,7 @@ import { ConnectionProvider, WalletProvider as SolanaWalletProvider } from '@sol
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { 
   PhantomWalletAdapter,
-  TrustWalletAdapter,
-  SolflareWalletAdapter,
+  TrustWalletAdapter
 } from '@solana/wallet-adapter-wallets';
 import { clusterApiUrl, Connection, Commitment } from '@solana/web3.js';
 import { toast } from 'react-hot-toast';
@@ -36,12 +35,23 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
   // Initialize wallets with configuration
   const wallets = useMemo(
-    () => [
-      new PhantomWalletAdapter({ connection }),
-      new TrustWalletAdapter(),
-      new SolflareWalletAdapter(),
-    ],
-    [connection]
+    () => {
+      // Check if we're in Brave browser with Solana wallet
+      const isBrave = (window as any)?.solana?.isBraveWallet;
+      
+      // If we're in Brave, only show Phantom
+      // This is because Brave's built-in wallet is detected as Phantom
+      if (isBrave) {
+        return [new PhantomWalletAdapter()];
+      }
+      
+      // Otherwise show both Phantom and Trust
+      return [
+        new PhantomWalletAdapter(),
+        new TrustWalletAdapter()
+      ];
+    },
+    []
   );
 
   const handleError = (error: WalletError) => {

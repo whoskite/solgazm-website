@@ -1,3 +1,5 @@
+'use client';
+
 import { FC, useCallback, useEffect } from 'react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -60,8 +62,19 @@ export const CustomWalletModal: FC = () => {
     }
   }, [visible, audio]);
 
-  const handleWalletClick = useCallback(async (walletName: string) => {
+  const handleWalletClick = useCallback(async (walletName: WalletName) => {
     try {
+      if (connecting) {
+        toast.error('Already connecting to wallet, please wait...');
+        return;
+      }
+
+      if (connected && publicKey) {
+        toast.success('Wallet already connected!');
+        setVisible(false);
+        return;
+      }
+
       const wallet = wallets.find(w => w.adapter.name === walletName);
       if (!wallet) {
         toast.error(`${walletName} wallet not found`);
@@ -76,21 +89,13 @@ export const CustomWalletModal: FC = () => {
         return;
       }
 
-      if (connecting) {
-        toast.error('Already connecting to wallet, please wait...');
-        return;
-      }
+      // Select the wallet first
+      await select(walletName);
 
-      if (connected && publicKey) {
-        toast.success('Wallet already connected!');
-        setVisible(false);
-        return;
-      }
+      // Wait a bit for the selection to take effect
+      await new Promise(resolve => setTimeout(resolve, 100));
 
-      if (selectedWallet?.adapter.name !== walletName) {
-        await select(wallet.adapter.name as WalletName);
-      }
-
+      // Then try to connect
       await connect().catch((error) => {
         console.error('Connection error:', error);
         if (error.message?.includes('User rejected')) {
@@ -106,8 +111,12 @@ export const CustomWalletModal: FC = () => {
       toast.success(`Connected to ${walletName}`);
     } catch (error: any) {
       console.error('Error:', error);
+      // Don't show WalletNotSelectedError to users as it's handled internally
+      if (error.name !== 'WalletNotSelectedError') {
+        toast.error(error.message || 'Failed to connect wallet');
+      }
     }
-  }, [wallets, select, connect, connecting, connected, publicKey, selectedWallet, setVisible, audio]);
+  }, [connecting, connected, publicKey, select, connect, setVisible, wallets, audio]);
 
   if (!visible) return null;
 
@@ -167,7 +176,7 @@ export const CustomWalletModal: FC = () => {
                   key={wallet.adapter.name}
                   name={wallet.adapter.name}
                   icon={wallet.adapter.icon}
-                  onClick={() => handleWalletClick(wallet.adapter.name)}
+                  onClick={() => handleWalletClick(wallet.adapter.name as WalletName)}
                   detected={wallet.readyState === WalletReadyState.Installed}
                   readyState={wallet.readyState}
                 />
