@@ -4,6 +4,7 @@
   align-items: center;
 }
 
+/* Default button styling */
 .wallet-adapter-button-trigger {
   background: linear-gradient(to right, #4e44ce, #6366f1) !important;
   padding: 0.75rem 1.5rem !important;
@@ -14,6 +15,9 @@
   font-weight: 600 !important;
   color: white !important;
   transition: all 0.2s ease-in-out !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .wallet-adapter-button:not([disabled]):hover {
@@ -21,14 +25,84 @@
   opacity: 0.9 !important;
 }
 
+/* Wallet address container styles */
+.wallet-address-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.wallet-address-button {
+  background: linear-gradient(to right, #4e44ce, #6366f1) !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 12px !important;
+  color: white !important;
+}
+
+.wallet-address-button:hover {
+  background: linear-gradient(to right, #4338ca, #5b5ef4) !important;
+}
+
+/* Disconnect button styles */
+.disconnect-button {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.disconnect-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.3);
+}
+
+/* Ensure dropdown wrapper is properly positioned */
+.wallet-adapter-dropdown {
+  display: flex !important;
+  align-items: center !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Dropdown styling */
+.wallet-adapter-dropdown-list {
+  background: #1a1b1f !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  margin-top: 10px !important;
+  padding: 0 !important;
+  z-index: 9999 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+}
+
+.wallet-adapter-dropdown-list-item {
+  padding: 0.75rem 1.25rem !important;
+  color: white !important;
+  font-size: 0.9rem !important;
+  transition: background-color 0.2s ease-in-out !important;
+  cursor: pointer !important;
+}
+
+.wallet-adapter-dropdown-list-item:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Modal styling */
 .wallet-adapter-modal {
-  background: rgba(0, 0, 0, 0.5) !important;
+  background: rgba(0, 0, 0, 0.7) !important;
+  z-index: 9999 !important;
 }
 
 .wallet-adapter-modal-wrapper {
   background: #1a1b1f !important;
   border-radius: 16px !important;
   color: white !important;
+  max-width: 450px !important;
 }
 
 .wallet-adapter-modal-button-close {

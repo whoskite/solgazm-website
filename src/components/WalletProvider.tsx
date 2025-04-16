@@ -1,16 +1,13 @@
 'use client';
 
-import { FC, ReactNode, useMemo, useCallback } from 'react';
+import { FC, ReactNode, useMemo, useCallback, useState, createContext, useContext, useEffect } from 'react';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import { 
   PhantomWalletAdapter,
-  SolflareWalletAdapter,
-  TorusWalletAdapter,
-  SolongWalletAdapter,
-  Coin98WalletAdapter
+  SolflareWalletAdapter
 } from '@solana/wallet-adapter-wallets';
-import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
+import { WalletModalProvider, useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { clusterApiUrl } from '@solana/web3.js';
 import { toast } from 'react-hot-toast';
 
@@ -21,28 +18,56 @@ interface Props {
   children: ReactNode;
 }
 
+// Create a context to share the custom visibility state
+const CustomWalletModalContext = createContext<{
+  visible: boolean;
+  setVisible: (visible: boolean) => void;
+}>({
+  visible: false,
+  setVisible: () => undefined,
+});
+
+// Hook to use the custom wallet modal visibility
+export const useCustomWalletModal = () => useContext(CustomWalletModalContext);
+
+// This custom provider prevents the default wallet modal from showing
+// while still providing the wallet modal context for our custom modal
+const NoModalWalletProvider: FC<{ children: ReactNode }> = ({ children }) => {
+  // Manage our own visibility state
+  const [visible, setVisible] = useState(false);
+  
+  // Get the default modal context to override it
+  const defaultWalletModal = useWalletModal();
+  
+  // Override the default modal's visibility with our own
+  useEffect(() => {
+    // Hide the default modal whenever it might appear
+    if (defaultWalletModal.visible) {
+      defaultWalletModal.setVisible(false);
+    }
+  }, [defaultWalletModal.visible]);
+  
+  return (
+    <CustomWalletModalContext.Provider value={{ visible, setVisible }}>
+      {children}
+    </CustomWalletModalContext.Provider>
+  );
+};
+
 export const SolanaWalletProvider: FC<Props> = ({ children }) => {
-  // Using mainnet-beta instead of devnet
-  const network = WalletAdapterNetwork.Mainnet;
+  // Use the standard RPC endpoint - avoid custom endpoints that might cause issues
+  const endpoint = useMemo(() => clusterApiUrl(WalletAdapterNetwork.Mainnet), []);
 
-  // You can also provide a custom RPC endpoint.
-  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
-
-  // @solana/wallet-adapter-wallets includes all the adapters but supports tree shaking and lazy loading --
-  // Only the wallets you configure here will be compiled into your application, and only the dependencies
-  // of wallets that your users connect to will be loaded.
+  // Simple wallet configuration - avoid excess options that might conflict
   const wallets = useMemo(
     () => [
       new PhantomWalletAdapter(),
-      new SolflareWalletAdapter(),
-      new TorusWalletAdapter(),
-      new SolongWalletAdapter(),
-      new Coin98WalletAdapter(),
+      new SolflareWalletAdapter()
     ],
     []
   );
 
-  // Define error callback
+  // Simple error handler
   const onError = useCallback(
     (error: Error) => {
       console.error('Wallet error:', error);
@@ -55,11 +80,13 @@ export const SolanaWalletProvider: FC<Props> = ({ children }) => {
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider 
         wallets={wallets} 
-        autoConnect={true}
+        autoConnect={false}
         onError={onError}
       >
         <WalletModalProvider>
-          {children}
+          <NoModalWalletProvider>
+            {children}
+          </NoModalWalletProvider>
         </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>

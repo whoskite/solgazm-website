@@ -3,7 +3,7 @@
 import React from 'react'
 import dynamic from 'next/dynamic'
 import { CursorProvider } from '@/contexts/CursorContext'
-import { WalletProvider } from '@/contexts/WalletContext'
+import { SolanaWalletProvider } from '@/components/WalletProvider'
 import { AudioProvider } from '@/contexts/AudioContext'
 import { CustomWalletModal } from '@/components/CustomWalletModal'
 
@@ -16,7 +16,7 @@ interface ClientWrapperProps {
 
 const ClientWrapper = ({ children }: ClientWrapperProps) => {
   return (
-    <WalletProvider>
+    <SolanaWalletProvider>
       <AudioProvider>
         <CursorProvider>
           <Cursor />
@@ -24,7 +24,7 @@ const ClientWrapper = ({ children }: ClientWrapperProps) => {
           <CustomWalletModal />
         </CursorProvider>
       </AudioProvider>
-    </WalletProvider>
+    </SolanaWalletProvider>
   )
 }
 
