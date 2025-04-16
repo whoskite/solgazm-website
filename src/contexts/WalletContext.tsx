@@ -6,6 +6,7 @@ import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { clusterApiUrl } from '@solana/web3.js';
 import { toast } from 'react-hot-toast';
+import { CustomWalletModal } from '@/components/CustomWalletModal';
 
 // Create context
 const WalletContext = createContext<{
@@ -46,6 +47,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
           <WalletContext.Provider value={{ isConnected, setIsConnected }}>
             {children}
           </WalletContext.Provider>
+          <CustomWalletModal />
         </WalletModalProvider>
       </SolanaWalletProvider>
     </ConnectionProvider>

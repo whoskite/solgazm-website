@@ -6,6 +6,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { WalletButton } from "@/components/WalletButton"
 import { useAudio } from '@/contexts/AudioContext'
+import { Navigation } from '@/components/Navigation'
 
 export default function Home() {
   const { isPlaying, toggleAudio, playBubbleSound } = useAudio()
@@ -43,7 +44,8 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="h-screen overflow-hidden relative">
+    <main className="min-h-screen bg-black">
+      <Navigation />
       {/* SVG Filter for Graffiti Texture */}
       <svg width="0" height="0" className="absolute">
         <filter id="gritty-texture" x="-50%" y="-50%" width="200%" height="200%">
@@ -95,151 +97,6 @@ export default function Home() {
 
       {/* Content Container */}
       <main className="relative min-h-screen z-10">
-        {/* Navigation Header */}
-        <motion.header 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-sm"
-        >
-          <div className="max-w-7xl mx-auto px-4 flex items-center justify-between py-3">
-            {/* Left Section - Logo */}
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-[80px] md:w-[100px] cursor-pointer"
-            >
-              <Image
-                src="/1_World of Gazm.png"
-                alt="World of Gazm"
-                width={100}
-                height={100}
-                className="w-full h-auto object-contain"
-                priority
-                unoptimized
-              />
-            </motion.div>
-
-            {/* Center Section - Navigation */}
-            <nav className="hidden md:flex items-center space-x-12">
-              <motion.a
-                href="#home"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center justify-center w-28 h-auto"
-              >
-                <Image
-                  src="/Home.png"
-                  alt="Home Button"
-                  width={100}
-                  height={35}
-                  className="w-full h-auto object-contain hover:opacity-80 transition-opacity duration-300 brightness-100"
-                  priority
-                  unoptimized
-                />
-              </motion.a>
-              <Link href="/drops" className="flex items-center justify-center w-28 h-auto">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Image
-                    src="/Drop_button.png"
-                    alt="Drops Button"
-                    width={100}
-                    height={35}
-                    className="w-full h-auto object-contain hover:opacity-80 transition-opacity duration-300 brightness-100"
-                    priority
-                    unoptimized
-                  />
-                </motion.div>
-              </Link>
-              <motion.a
-                href="#lore"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center justify-center w-28 h-auto"
-              >
-                <Image
-                  src="/Lore_button.png"
-                  alt="Lore Button"
-                  width={100}
-                  height={35}
-                  className="w-full h-auto object-contain hover:opacity-80 transition-opacity duration-300 brightness-100"
-                  priority
-                  unoptimized
-                />
-              </motion.a>
-              <motion.a
-                href="#academy"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center justify-center w-28 h-auto"
-              >
-                <Image
-                  src="/Academy_button.png"
-                  alt="Academy Button"
-                  width={100}
-                  height={35}
-                  className="w-full h-auto object-contain hover:opacity-80 transition-opacity duration-300 brightness-100"
-                  priority
-                  unoptimized
-                />
-              </motion.a>
-            </nav>
-
-            {/* Right Section - Connect Wallet and Audio Controls */}
-            <div className="flex items-center space-x-6 mr-4">
-              {/* Audio Button */}
-              <motion.button
-                onClick={toggleAudio}
-                className="hidden md:flex items-center justify-center w-12 h-12 p-1 rounded-full transition-colors duration-300"
-                title={isPlaying ? "Mute" : "Unmute"}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                {!isPlaying ? (
-                  <Image 
-                    src="/Mute_Icon.png" 
-                    alt="Unmute" 
-                    width={40}
-                    height={40}
-                    className="w-full h-full object-contain"
-                    unoptimized
-                  />
-                ) : (
-                  <Image 
-                    src="/Speaker_Icon.png" 
-                    alt="Mute" 
-                    width={40}
-                    height={40}
-                    className="w-full h-full object-contain"
-                    unoptimized
-                  />
-                )}
-              </motion.button>
-              
-              {/* Connect Wallet/Profile Button */}
-              <WalletButton />
-            </div>
-
-            {/* Mobile Menu Button */}
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              className="md:hidden p-2 text-white hover:text-yellow-400 transition-colors duration-300 absolute right-4"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </motion.button>
-          </div>
-        </motion.header>
-
         {/* Hero Section */}
         <div className="h-screen flex items-center justify-center overflow-hidden">
           {/* Container for all content */}
@@ -437,6 +294,6 @@ export default function Home() {
           </div>
         </div>
       </main>
-    </div>
+    </main>
   )
 }

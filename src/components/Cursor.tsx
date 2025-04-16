@@ -7,7 +7,7 @@ const Cursor: React.FC = () => {
 
   return (
     <div
-      className="fixed pointer-events-none z-50"
+      className="fixed pointer-events-none z-[9999]"
       style={{
         left: `${cursorPosition.x}px`,
         top: `${cursorPosition.y}px`,
