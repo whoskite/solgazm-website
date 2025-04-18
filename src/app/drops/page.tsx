@@ -4,6 +4,7 @@ import React from 'react'
 import Image from "next/image"
 import { Navigation } from '@/components/Navigation'
 import { WalletButton } from '@/components/WalletButton'
+import SignVerifyTest from './SignVerifyTest'
 
 export default function Drops() {
   return (
@@ -79,6 +80,10 @@ export default function Drops() {
             </div>
           </div>
         </div>
+      </div>
+      {/* Sign & Verify Test Section */}
+      <div className="relative z-20 py-10">
+        <SignVerifyTest />
       </div>
     </main>
   )

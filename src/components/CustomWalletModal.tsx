@@ -186,163 +186,40 @@ export const CustomWalletModal: FC = () => {
     }
   }, [connected, publicKey, visible]);
 
-  const handleWalletClick = useCallback(async (walletName: WalletName) => {
-    try {
-      if (connecting || connectingWallet) {
-        toast.error('Already connecting to wallet, please wait...');
-        return;
-      }
+  // Store the walletName the user wants to connect to
+  const [pendingWalletName, setPendingWalletName] = useState<WalletName | null>(null);
 
-      setConnectingWallet(walletName);
-      console.log(`Attempting to connect to ${walletName}...`);
-      
-      // Special handling for Phantom wallet
-      if (walletName === 'Phantom') {
-        try {
-          console.log('Trying direct Phantom connection method');
-          
-          // Check specifically for Phantom's own provider first
-          // This helps bypass Brave's interference
-          const isDirectPhantomAvailable = !!(window as any)?.phantom?.solana;
-          
-          if (!isPhantomInstalled() && !isDirectPhantomAvailable) {
-            toast.error('Phantom wallet is not installed. Please install it first.');
-            setConnectingWallet(null);
-            return;
-          }
-          
-          // Use our direct connection utility with priority on window.phantom.solana
-          const response = await connectToPhantomDirectly();
-          
-          if (response.publicKey) {
-            // Success with direct connection!
-            console.log('Successfully connected to Phantom directly');
-            
-            // Just select the wallet in the adapter
-            try {
-              console.log('Setting selected wallet in adapter...');
-              select(walletName);
-            } catch (err) {
-              console.log('Failed to select wallet in adapter, but direct connection is working');
-            }
-            
-            // Save the connection state to localStorage (already done in connectToPhantomDirectly)
-            // This will allow our WalletButton component to recognize the connection
-            
-            // Success feedback and close modal
-            toast.success(`Connected to Phantom wallet!`);
-            audio?.playSuccessSound();
-            setVisible(false);
-            
-            return;
-          }
-        } catch (error) {
-          console.error('Direct Phantom connection failed:', error);
-          // Continue to standard flow as fallback
-        }
-      }
-      
-      // Standard flow for other wallets or as fallback
-      const wallet = wallets.find(w => w.adapter.name === walletName);
-      if (!wallet) {
-        toast.error(`${walletName} wallet not found`);
-        setConnectingWallet(null);
-        return;
-      }
+  // Handler: user clicks a wallet
+  const handleWalletClick = useCallback((walletName: WalletName) => {
+    if (connecting || connectingWallet) {
+      toast.error('Already connecting to wallet, please wait...');
+      return;
+    }
+    setConnectingWallet(walletName);
+    setPendingWalletName(walletName);
+    select(walletName);
+  }, [connecting, connectingWallet, select]);
 
-      if (wallet.readyState !== WalletReadyState.Installed && wallet.readyState !== WalletReadyState.Loadable) {
-        if (wallet.adapter.url) {
-          window.open(wallet.adapter.url, '_blank');
-          toast.error(`Please install ${walletName} wallet`);
-        } else {
-          toast.error(`${walletName} wallet is not installed. Please visit their website to download.`);
-        }
-        setConnectingWallet(null);
-        return;
-      }
-
-      // If already connected to a different wallet, disconnect first
-      if (connected && selectedWallet?.adapter.name !== walletName) {
-        try {
-          await disconnect();
-          // Add a longer delay to allow state to settle after disconnect
-          await new Promise(resolve => setTimeout(resolve, 400)); 
-        } catch (disconnectError) {
-          console.error('Error during disconnect:', disconnectError);
-          toast.error('Failed to disconnect previous wallet. Please try again.');
-          setConnectingWallet(null);
-          return; // Stop if disconnect fails
-        }
-      }
-
+  // Effect: when selectedWallet changes and matches pendingWalletName, call connect()
+  useEffect(() => {
+    const doConnect = async () => {
+      if (!pendingWalletName) return;
+      if (!selectedWallet || selectedWallet.adapter.name !== pendingWalletName) return;
       try {
-        const adapter = wallet.adapter;
-        
-        console.log(`Attempting standard adapter connection to ${walletName}...`);
-        
-        // Try connecting through the adapter
-        await adapter.connect().catch(error => {
-          console.error('Detailed connection error:', {
-            errorName: error.name,
-            errorMessage: error.message,
-            errorStack: error.stack,
-            walletName: walletName,
-            adapterName: adapter.name,
-            readyState: wallet.readyState
-          });
-          throw error;
-        });
-        
-        console.log(`Successfully connected to ${walletName}`);
-        
-        // Success handling
+        await connect();
         audio?.playSuccessSound();
         setVisible(false);
-        toast.success(`Connected to ${walletName}`);
-        
-        // Save wallet connection status to localStorage for better state persistence
-        if (adapter.publicKey) {
-          saveWalletConnectionState(adapter.publicKey.toString(), walletName);
-        } else {
-          localStorage.setItem('walletConnected', 'true');
-          localStorage.setItem('lastConnectedWallet', walletName);
-        }
-        
-        // No longer forcing a page reload
-        // setTimeout(() => {
-        //   window.location.reload();
-        // }, 1000);
-      } catch (error: any) {
-        setConnectingWallet(null); // Reset connecting state on any error
-        console.error('Wallet connection error:', error);
-
-        if (error.message?.includes('User rejected')) {
-          toast.error('Connection rejected by user');
-        } else if (error.name === 'WalletConnectionError' || error.message?.includes('Unexpected error')) {
-          // Check if we're in Brave browser and provide more specific guidance
-          const isBrave = navigator.userAgent.includes('Brave') || !!(window as any).solana?.isBraveWallet;
-          
-          if (isBrave && walletName === 'Phantom') {
-            toast.error(
-              'Connection to Phantom failed in Brave browser. Try disabling Brave Wallet in browser settings, or use Chrome/Firefox.',
-              { duration: 8000 }
-            );
-          } else {
-            toast.error(`Connection failed. Please try the test page at /phantom-test for detailed diagnostics.`, { duration: 5000 });
-          }
-        } else if (error.name === 'WalletNotSelectedError') {
-          toast.error('Wallet not selected. Please try again.');
-        } else {
-          toast.error(error.message || 'Failed to connect wallet. Please try again.');
-        }
+        toast.success(`Connected to ${pendingWalletName} wallet!`);
+      } catch (e: any) {
+        toast.error(e.message || 'Failed to connect wallet. Please try again.');
+      } finally {
+        setConnectingWallet(null);
+        setPendingWalletName(null);
       }
-    } catch (error: any) {
-      // Catch errors from finding wallet, checking readyState, or disconnecting
-      console.error('Error during wallet selection/preparation:', error);
-      setConnectingWallet(null);
-      toast.error(error.message || 'An error occurred before attempting connection.');
-    }
-  }, [connecting, connectingWallet, connected, selectedWallet, disconnect, wallets, setVisible, audio, browserInfo, publicKey, select, connect]);
+    };
+    doConnect();
+    // Only run when selectedWallet or pendingWalletName changes
+  }, [selectedWallet, pendingWalletName, connect, audio, setVisible]);
 
   if (!visible) return null;
 

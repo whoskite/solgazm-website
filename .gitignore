@@ -23,6 +23,8 @@
 # misc
 .DS_Store
 *.pem
+SOLANA_REFERENCE.md
+SOLANA_WALLET_DAILY_LOGIN_CHECKLIST.md
 
 # debug
 npm-debug.log*
