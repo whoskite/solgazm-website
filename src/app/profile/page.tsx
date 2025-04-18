@@ -12,9 +12,16 @@ export default function ProfilePage() {
       <Navigation />
 
       {/* Profile content centered below header */}
-      <main className="flex flex-col items-center justify-center pt-32 pb-16">
-        <div className="w-full max-w-xl mx-auto p-8">
-          <h1 className="text-3xl font-bold text-white mb-4 text-center">Profile</h1>
+      <main className="flex flex-col items-center justify-center pt-40">
+        <div className="w-full max-w-xl mx-auto">
+          <div className="flex justify-center">
+            <img 
+              src="/Profile_Title_WorldofGazm.png" 
+              alt="Profile Title"
+              className="max-w-xs w-full h-auto object-contain drop-shadow-lg"
+              style={{ maxWidth: '320px' }}
+            />
+          </div>
           <div className="flex justify-center mb-4">
             <img 
               src="/Profile_Stand_WorldofGazm.png" 
