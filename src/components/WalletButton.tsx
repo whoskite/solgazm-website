@@ -127,18 +127,10 @@ export const WalletButton: FC = () => {
                 transition={{ duration: 0.2 }}
               >
                 <div className="p-4 border-b border-gray-700">
-                  <span className="font-medium">Wallet</span>
-                  <div className="ml-auto wallet-connected-badge">Connected</div>
-                  {publicKey && (
-                    <div>
-                      <p className="text-xs text-gray-400 mb-1">Wallet Address:</p>
-                      <div className="flex items-center">
-                        <p className="wallet-address-full">
-                          {publicKey.toBase58()}
-                        </p>
-                      </div>
-                    </div>
-                  )}
+                  <div className="flex items-center w-full">
+                    <span className="font-medium">Wallet</span>
+                    <div className="ml-auto wallet-connected-badge px-2 py-0.5 rounded text-xs bg-green-700/80 text-green-200 font-semibold">Connected</div>
+                  </div>
                 </div>
                 <div className="p-2 border-b border-gray-700">
                   <button 

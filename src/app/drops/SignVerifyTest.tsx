@@ -4,6 +4,9 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import bs58 from 'bs58';
 
 export default function SignVerifyTest() {
+  // TEMPORARILY DISABLED: Sign and Verify UI is hidden
+  return null;
+
   const { publicKey, signMessage, connected } = useWallet();
   const [message, setMessage] = useState("Hello, World!");
   const [signature, setSignature] = useState<string | null>(null);

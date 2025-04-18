@@ -8,7 +8,7 @@ import SignVerifyTest from './SignVerifyTest'
 
 export default function Drops() {
   return (
-    <main className="min-h-screen bg-black">
+    <main className="min-h-screen bg-black overflow-hidden">
       <Navigation />
       <div className="h-screen overflow-hidden relative">
         {/* Background Image */}
@@ -35,9 +35,9 @@ export default function Drops() {
                   <Image
                     src="/Drop_button.png"
                     alt="Drops"
-                    width={100}
-                    height={25}
-                    className="w-auto h-auto max-w-[150px] md:max-w-[200px]"
+                    width={60}
+                    height={18}
+                    className="w-auto h-auto max-w-[90px]"
                     priority
                     unoptimized
                   />
