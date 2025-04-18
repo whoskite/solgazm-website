@@ -14,19 +14,32 @@ export function isBraveInstalled(): boolean {
 }
 
 /**
- * Get the current Solana wallet type (phantom, brave, or none)
+ * Get the current Solana wallet type from window.solana
  */
-export function getCurrentSolanaWalletType(): 'phantom' | 'brave' | 'none' {
-  const solana = (window as any).solana;
-  if (solana?.isBraveWallet) return 'brave';
-  if (solana?.isPhantom) return 'phantom';
-  return 'none';
+export function getCurrentSolanaWalletType() {
+  const solana = (window as any)?.solana;
+  const phantomProvider = (window as any)?.phantom?.solana;
+  
+  return {
+    isPhantom: !!solana?.isPhantom && !solana?.isBraveWallet,
+    isBrave: !!solana?.isBraveWallet,
+    hasPhantomProvider: !!phantomProvider,
+    hasWindowSolana: !!solana,
+    provider: phantomProvider || solana || null,
+  };
 }
 
 /**
  * Check if Phantom is installed and available (not Brave)
  */
 export function isPhantomInstalled(): boolean {
+  // First check for the dedicated Phantom provider (works better in Brave)
+  const phantomProvider = (window as any).phantom?.solana;
+  if (phantomProvider) {
+    return true;
+  }
+  
+  // Fallback to the standard window.solana check
   const solana = (window as any).solana;
   return solana && solana.isPhantom && !solana.isBraveWallet;
 }
@@ -38,17 +51,24 @@ export async function connectToPhantomDirectly() {
   try {
     console.log('Attempting direct Phantom connection...');
     
-    if (!isPhantomInstalled()) {
-      console.error('Phantom not installed');
-      throw new Error('Phantom wallet is not installed');
+    // First try to use window.phantom.solana (more reliable in Brave)
+    let provider = (window as any).phantom?.solana;
+    
+    // Fall back to window.solana if needed
+    if (!provider) {
+      if (!isPhantomInstalled()) {
+        console.error('Phantom not installed');
+        throw new Error('Phantom wallet is not installed');
+      }
+      provider = (window as any).solana;
     }
     
-    const solana = (window as any).solana;
-    console.log('Phantom version:', solana.version);
-    console.log('Phantom state:', solana.isConnected ? 'connected' : 'disconnected');
+    console.log('Phantom provider found:', provider ? 'Yes' : 'No');
+    console.log('Phantom version:', provider?.version || 'Unknown');
+    console.log('Phantom state:', provider?.isConnected ? 'connected' : 'disconnected');
     
     // Connect directly to Phantom
-    const response = await solana.connect();
+    const response = await provider.connect();
     
     console.log('Direct Phantom connection successful!', {
       publicKey: response.publicKey.toString()
@@ -76,12 +96,20 @@ export async function connectToPhantomDirectly() {
  */
 export async function disconnectPhantomDirectly() {
   try {
-    if (!isPhantomInstalled()) {
-      throw new Error('Phantom wallet is not installed');
+    console.log('Attempting to disconnect from Phantom...');
+    
+    // First try to use window.phantom.solana (more reliable in Brave)
+    let provider = (window as any).phantom?.solana;
+    
+    // Fall back to window.solana if needed
+    if (!provider) {
+      if (!isPhantomInstalled()) {
+        throw new Error('Phantom wallet is not installed');
+      }
+      provider = (window as any).solana;
     }
     
-    const solana = (window as any).solana;
-    await solana.disconnect();
+    await provider.disconnect();
     console.log('Disconnected from Phantom directly');
     
     // Clear connection data from localStorage
@@ -96,5 +124,32 @@ export async function disconnectPhantomDirectly() {
   } catch (error) {
     console.error('Error disconnecting from Phantom:', error);
     throw error;
+  }
+}
+
+/**
+ * Save wallet connection state to localStorage
+ * General purpose function for any wallet type
+ */
+export function saveWalletConnectionState(publicKey: string | null, walletName: string | null) {
+  if (publicKey) {
+    localStorage.setItem('walletConnected', 'true');
+    localStorage.setItem('lastConnectedWallet', walletName || 'unknown');
+    // Don't override phantom-specific entries if this isn't phantom
+    if (walletName === 'Phantom') {
+      localStorage.setItem('phantomConnected', 'true');
+      localStorage.setItem('phantomPublicKey', publicKey);
+    }
+    console.log(`Saved ${walletName || 'wallet'} connection state to localStorage`);
+  } else {
+    // Clear connection state
+    localStorage.setItem('walletConnected', 'false');
+    localStorage.removeItem('lastConnectedWallet');
+    // Only clear phantom data if explicitly disconnecting phantom
+    if (walletName === 'Phantom' || !walletName) {
+      localStorage.removeItem('phantomConnected');
+      localStorage.removeItem('phantomPublicKey');
+    }
+    console.log(`Cleared ${walletName || 'wallet'} connection state from localStorage`);
   }
 } 

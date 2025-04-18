@@ -1,10 +1,13 @@
 'use client';
 
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import { ConnectionProvider, WalletProvider as SolanaWalletProvider } from '@solana/wallet-adapter-react';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { 
   PhantomWalletAdapter,
+  SolflareWalletAdapter,
+  LedgerWalletAdapter,
+  TorusWalletAdapter,
   TrustWalletAdapter
 } from '@solana/wallet-adapter-wallets';
 import { clusterApiUrl, Connection, Commitment } from '@solana/web3.js';
@@ -46,18 +49,18 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const wallets = useMemo(() => {
     if (typeof window !== 'undefined') {
       const { isPhantom, isBrave } = getSolanaWalletType();
-      const walletList = [];
-      if (isPhantom) walletList.push(new PhantomWalletAdapter());
-      if (isBrave) walletList.push(new PhantomWalletAdapter()); // Use a custom Brave adapter if available
-      if (!isPhantom && !isBrave) {
-        walletList.push(new PhantomWalletAdapter(), new TrustWalletAdapter());
-      }
-      return walletList;
+      return [
+        new PhantomWalletAdapter(),
+        new SolflareWalletAdapter(),
+        new LedgerWalletAdapter(),
+        new TorusWalletAdapter(),
+        new TrustWalletAdapter()
+      ];
     }
     return [new PhantomWalletAdapter(), new TrustWalletAdapter()];
   }, []);
 
-  const handleError = (error: WalletError) => {
+  const handleError = useCallback((error: WalletError) => {
     console.error('Wallet error:', error);
     
     if (error.name === 'WalletNotReadyError') {
@@ -78,7 +81,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       toast.error(error.message || 'An unexpected wallet error occurred');
       setIsConnected(false);
     }
-  };
+  }, []);
 
   // Check local storage for connection state on mount
   useEffect(() => {
@@ -93,11 +96,17 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('walletConnected', isConnected.toString());
   }, [isConnected]);
 
+  // Determine if we should autoConnect
+  const shouldAutoConnect = useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('walletConnected') === 'true';
+  }, []);
+
   return (
     <ConnectionProvider endpoint={endpoint} config={{ commitment }}>
       <SolanaWalletProvider 
         wallets={wallets}
-        autoConnect={false}
+        autoConnect={shouldAutoConnect}
         onError={handleError}
       >
         <WalletModalProvider>

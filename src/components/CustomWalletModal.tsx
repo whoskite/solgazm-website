@@ -7,8 +7,9 @@ import { WalletReadyState, WalletName } from '@solana/wallet-adapter-base';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { useAudio } from '@/contexts/AudioContext';
-import { connectToPhantomDirectly, isPhantomInstalled, isBraveInstalled, getCurrentSolanaWalletType } from '@/utils/phantomHelper';
+import { connectToPhantomDirectly, isPhantomInstalled, isBraveInstalled, getCurrentSolanaWalletType, saveWalletConnectionState } from '@/utils/phantomHelper';
 import { useCustomWalletModal } from './WalletProvider';
+import { PublicKey } from '@solana/web3.js';
 
 interface WalletOptionProps {
   name: string;
@@ -27,12 +28,12 @@ const WalletOption: FC<WalletOptionProps> = ({
   onClick, 
   detected, 
   readyState,
-  isConnecting 
+  isConnecting
 }) => (
   <button
     onClick={onClick}
     disabled={readyState === WalletReadyState.Unsupported || readyState === WalletReadyState.NotDetected || isConnecting}
-    className="w-full flex items-center justify-between h-[48px] bg-[#1A1B1F] hover:bg-[#2A2B2F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed px-3 mb-2 rounded"
+    className="w-full flex items-center justify-between h-[48px] bg-[#1A1B1F] hover:bg-[#2A2B2F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed px-3 rounded"
   >
     <div className="flex items-center">
       <img src={icon} alt={displayName} className="w-6 h-6 mr-3" />
@@ -115,33 +116,54 @@ export const CustomWalletModal: FC = () => {
   // Modify wallet list to show correct names - with Brave handling
   const modifiedWallets = useMemo(() => {
     return wallets.map(wallet => {
-      let displayName = wallet.adapter.name;
-      // If Brave is installed and this is Phantom adapter, label as Brave
-      if (isBraveInstalled() && wallet.adapter.name === 'Phantom') {
-        displayName = 'Brave';
-      }
+      // Remove Brave relabeling logic; always show Phantom as Phantom
       return {
         ...wallet,
-        displayName,
+        displayName: wallet.adapter.name,
       };
     });
   }, [wallets]);
 
+
+
   // Get primary wallets and more options
   const { primaryWallets, moreWallets } = useMemo(() => {
-    const primary = modifiedWallets.filter(w => 
+    // Filter out any Brave wallet adapters to avoid confusion
+    const filteredWallets = modifiedWallets.filter(w => 
+      !w.adapter.name.includes('Brave') && 
+      !w.displayName.includes('Brave')
+    );
+    
+    // First prioritize wallets that are installed
+    const installedWallets = filteredWallets.filter(w => 
+      w.readyState === WalletReadyState.Installed ||
+      w.readyState === WalletReadyState.Loadable
+    );
+    
+    // Then sort by preferred wallets
+    const primary = installedWallets.filter(w => 
       w.adapter.name === 'Phantom' || 
-      w.adapter.name === 'MetaMask' || 
-      w.adapter.name === 'Solflare'
+      w.adapter.name === 'Solflare' || 
+      w.adapter.name === 'Backpack'
     );
     
-    const more = modifiedWallets.filter(w => 
+    // Put other installed wallets next
+    const otherInstalled = installedWallets.filter(w => 
       w.adapter.name !== 'Phantom' && 
-      w.adapter.name !== 'MetaMask' && 
-      w.adapter.name !== 'Solflare'
+      w.adapter.name !== 'Solflare' &&
+      w.adapter.name !== 'Backpack'
     );
     
-    return { primaryWallets: primary, moreWallets: more };
+    // Group non-installed wallets
+    const notInstalled = filteredWallets.filter(w => 
+      w.readyState !== WalletReadyState.Installed &&
+      w.readyState !== WalletReadyState.Loadable
+    );
+    
+    return { 
+      primaryWallets: [...primary, ...otherInstalled], 
+      moreWallets: notInstalled
+    };
   }, [modifiedWallets]);
 
   // Play floating sound effect when animation cycles
@@ -172,62 +194,42 @@ export const CustomWalletModal: FC = () => {
       }
 
       setConnectingWallet(walletName);
+      console.log(`Attempting to connect to ${walletName}...`);
       
       // Special handling for Phantom wallet
       if (walletName === 'Phantom') {
         try {
           console.log('Trying direct Phantom connection method');
           
-          if (!isPhantomInstalled()) {
+          // Check specifically for Phantom's own provider first
+          // This helps bypass Brave's interference
+          const isDirectPhantomAvailable = !!(window as any)?.phantom?.solana;
+          
+          if (!isPhantomInstalled() && !isDirectPhantomAvailable) {
             toast.error('Phantom wallet is not installed. Please install it first.');
             setConnectingWallet(null);
             return;
           }
           
-          // Use our direct connection utility
+          // Use our direct connection utility with priority on window.phantom.solana
           const response = await connectToPhantomDirectly();
           
           if (response.publicKey) {
             // Success with direct connection!
             console.log('Successfully connected to Phantom directly');
             
-            // IMPORTANT: Force sync with wallet adapter
+            // Just select the wallet in the adapter
             try {
-              // First select the wallet
+              console.log('Setting selected wallet in adapter...');
               select(walletName);
-              
-              // Wait until the wallet is actually selected and ready
-              let tries = 0;
-              while (tries < 40) { // up to 2 seconds
-                const current = wallets.find(w => w.adapter.name === walletName);
-                if (
-                  current &&
-                  selectedWallet &&
-                  current.adapter.name === selectedWallet.adapter.name &&
-                  current.readyState === WalletReadyState.Installed &&
-                  selectedWallet.adapter
-                ) {
-                  break;
-                }
-                await new Promise(resolve => setTimeout(resolve, 50));
-                tries++;
-              }
-              // Now tell the adapter to connect to the selected wallet
-              try {
-                await connect();
-              } catch (err: any) {
-                if (err.name === 'WalletNotSelectedError') {
-                  toast.error('Wallet not selected. Please try again.');
-                  return;
-                }
-                throw err;
-              }
-              console.log('Wallet adapter state synced after direct connection');
-            } catch (syncError) {
-              console.error('Error syncing adapter state:', syncError);
-              // Continue since direct connection worked
+            } catch (err) {
+              console.log('Failed to select wallet in adapter, but direct connection is working');
             }
             
+            // Save the connection state to localStorage (already done in connectToPhantomDirectly)
+            // This will allow our WalletButton component to recognize the connection
+            
+            // Success feedback and close modal
             toast.success(`Connected to Phantom wallet!`);
             audio?.playSuccessSound();
             setVisible(false);
@@ -248,11 +250,13 @@ export const CustomWalletModal: FC = () => {
         return;
       }
 
-      if (wallet.readyState !== WalletReadyState.Installed) {
+      if (wallet.readyState !== WalletReadyState.Installed && wallet.readyState !== WalletReadyState.Loadable) {
         if (wallet.adapter.url) {
           window.open(wallet.adapter.url, '_blank');
+          toast.error(`Please install ${walletName} wallet`);
+        } else {
+          toast.error(`${walletName} wallet is not installed. Please visit their website to download.`);
         }
-        toast.error(`Please install ${walletName} wallet`);
         setConnectingWallet(null);
         return;
       }
@@ -261,8 +265,8 @@ export const CustomWalletModal: FC = () => {
       if (connected && selectedWallet?.adapter.name !== walletName) {
         try {
           await disconnect();
-          // Add a small delay to allow state to settle after disconnect
-          await new Promise(resolve => setTimeout(resolve, 100)); 
+          // Add a longer delay to allow state to settle after disconnect
+          await new Promise(resolve => setTimeout(resolve, 400)); 
         } catch (disconnectError) {
           console.error('Error during disconnect:', disconnectError);
           toast.error('Failed to disconnect previous wallet. Please try again.');
@@ -276,6 +280,7 @@ export const CustomWalletModal: FC = () => {
         
         console.log(`Attempting standard adapter connection to ${walletName}...`);
         
+        // Try connecting through the adapter
         await adapter.connect().catch(error => {
           console.error('Detailed connection error:', {
             errorName: error.name,
@@ -294,6 +299,19 @@ export const CustomWalletModal: FC = () => {
         audio?.playSuccessSound();
         setVisible(false);
         toast.success(`Connected to ${walletName}`);
+        
+        // Save wallet connection status to localStorage for better state persistence
+        if (adapter.publicKey) {
+          saveWalletConnectionState(adapter.publicKey.toString(), walletName);
+        } else {
+          localStorage.setItem('walletConnected', 'true');
+          localStorage.setItem('lastConnectedWallet', walletName);
+        }
+        
+        // No longer forcing a page reload
+        // setTimeout(() => {
+        //   window.location.reload();
+        // }, 1000);
       } catch (error: any) {
         setConnectingWallet(null); // Reset connecting state on any error
         console.error('Wallet connection error:', error);
@@ -301,7 +319,17 @@ export const CustomWalletModal: FC = () => {
         if (error.message?.includes('User rejected')) {
           toast.error('Connection rejected by user');
         } else if (error.name === 'WalletConnectionError' || error.message?.includes('Unexpected error')) {
-          toast.error(`Connection failed. Please try the test page at /phantom-test for detailed diagnostics.`, { duration: 5000 });
+          // Check if we're in Brave browser and provide more specific guidance
+          const isBrave = navigator.userAgent.includes('Brave') || !!(window as any).solana?.isBraveWallet;
+          
+          if (isBrave && walletName === 'Phantom') {
+            toast.error(
+              'Connection to Phantom failed in Brave browser. Try disabling Brave Wallet in browser settings, or use Chrome/Firefox.',
+              { duration: 8000 }
+            );
+          } else {
+            toast.error(`Connection failed. Please try the test page at /phantom-test for detailed diagnostics.`, { duration: 5000 });
+          }
         } else if (error.name === 'WalletNotSelectedError') {
           toast.error('Wallet not selected. Please try again.');
         } else {
@@ -384,7 +412,7 @@ export const CustomWalletModal: FC = () => {
           {!connected ? (
             <>
               {/* Primary Wallet options */}
-              <div className="space-y-[1px]">
+              <div className="space-y-2">
                 {primaryWallets.map((wallet) => (
                   <WalletOption
                     key={wallet.adapter.name}
@@ -425,7 +453,7 @@ export const CustomWalletModal: FC = () => {
               
               {/* More wallets section */}
               {showMoreOptions && (
-                <div className="space-y-[1px] mt-4">
+                <div className="mt-4 space-y-2">
                   {moreWallets.map((wallet) => (
                     <WalletOption
                       key={wallet.adapter.name}
@@ -461,10 +489,21 @@ export const CustomWalletModal: FC = () => {
                 className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded transition-colors text-lg font-semibold"
                 onClick={async () => {
                   try {
+                    console.log('Disconnecting wallet...');
                     await disconnect();
+                    
+                    // Force reset the wallet selection
+                    select(null);
+                    
+                    console.log('Disconnect complete. Adapter state cleared.');
+                    
+                    // Add a longer delay to allow full reset
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
                     toast.success('Wallet disconnected successfully');
                     setVisible(false);
                   } catch (error) {
+                    console.error('Disconnect error:', error);
                     toast.error('Failed to disconnect wallet');
                   }
                 }}
@@ -478,12 +517,20 @@ export const CustomWalletModal: FC = () => {
                 onClick={async () => {
                   try {
                     // First disconnect current wallet
+                    console.log('Changing wallet, disconnecting first...');
                     await disconnect();
-                    // Then update UI state to show wallet options
-                    setTimeout(() => {
-                      setConnectingWallet(null);
-                    }, 100);
+                    
+                    // Force reset the wallet selection
+                    select(null);
+                    
+                    console.log('Wallet selection reset, preparing UI...');
+                    
+                    // Longer delay to ensure full disconnect cycle completes
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    setConnectingWallet(null);
                   } catch (error) {
+                    console.error('Error during wallet change:', error);
                     toast.error('Failed to disconnect wallet');
                   }
                 }}

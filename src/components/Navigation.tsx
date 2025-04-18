@@ -10,7 +10,7 @@ export const Navigation: FC = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-sm">
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between py-3">
+      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between py-1">
         {/* Left Section - Logo */}
         <Link href="/">
           <motion.div 
@@ -21,8 +21,8 @@ export const Navigation: FC = () => {
             <Image
               src="/1_World of Gazm.png"
               alt="World of Gazm"
-              width={100}
-              height={100}
+              width={85}
+              height={85}
               className="w-full h-auto object-contain"
               priority
               unoptimized
@@ -31,14 +31,14 @@ export const Navigation: FC = () => {
         </Link>
 
         {/* Center Section - Navigation */}
-        <nav className="hidden md:flex items-center space-x-4">
+        <nav className="hidden md:flex items-center space-x-2">
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Link href="/" className="flex items-center justify-center w-28 h-auto">
+            <Link href="/" className="flex items-center justify-center w-[85px] h-auto">
               <Image
                 src="/Home.png"
                 alt="Home Button"
-                width={100}
-                height={35}
+                width={85}
+                height={24}
                 className="w-full h-auto object-contain hover:opacity-80 transition-opacity duration-300 brightness-100"
                 priority
                 unoptimized
@@ -47,12 +47,12 @@ export const Navigation: FC = () => {
           </motion.div>
           
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Link href="/drops" className="flex items-center justify-center w-28 h-auto">
+            <Link href="/drops" className="flex items-center justify-center w-[85px] h-auto">
               <Image
                 src="/Drop_button.png"
                 alt="Drops Button"
-                width={100}
-                height={35}
+                width={85}
+                height={24}
                 className="w-full h-auto object-contain hover:opacity-80 transition-opacity duration-300 brightness-100"
                 priority
                 unoptimized
