@@ -95,7 +95,7 @@ export default function SignVerifyTest() {
       )}
       {publicKey && (
         <div className="mt-4 break-all text-xs">
-          <div><span className="font-semibold">Wallet Public Key:</span> {publicKey.toBase58()}</div>
+          <div><span className="font-semibold">Wallet Public Key:</span> {publicKey?.toBase58()}</div>
         </div>
       )}
       {error && (
